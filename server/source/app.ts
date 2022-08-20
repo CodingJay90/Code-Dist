@@ -45,7 +45,7 @@ class App {
             schema,
             csrfPrevention: true,
             cache: 'bounded',
-            introspection: false,
+            // introspection: false,
             plugins: [
                 ApolloServerPluginLandingPageGraphQLPlayground({
                     settings: {
