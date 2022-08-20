@@ -4,55 +4,96 @@ import compression from 'compression';
 import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
+import { buildSchema } from 'type-graphql';
+import { ApolloServer } from 'apollo-server-express';
+// import { ApolloServer } from 'apollo-server';
+import {
+    ApolloServerPluginLandingPageGraphQLPlayground,
+    ApolloServerPluginLandingPageLocalDefault,
+    ApolloServerPluginLandingPageProductionDefault,
+} from 'apollo-server-core';
+
 import Controller from '@/types/controller.interface';
 import logger from './config/logger';
 import ErrorMiddleware from '@/middleware/error.middleware';
 import connectDb from '@/config/db';
-import path from 'path';
-import { multerUpload } from './middleware/multer.middleware';
+import { UsersResolver } from './user.resolver';
 
 const NAMESPACE = 'Server';
 
 class App {
     public app: Application;
     public port: number;
+    private graphQLPath: string = '/graphql';
+    private resolvers: any[];
 
-    constructor(controllers: Controller[], port: number) {
+    constructor(resolvers: any[], port: number) {
         this.app = express();
         this.port = port;
+        this.resolvers = resolvers;
 
         connectDb;
         this.logRequests();
         this.initializeMiddleware();
-        this.initializeControllers(controllers);
     }
 
-    public startServer(): void {
-        this.app.listen(this.port, () => {
-            console.log(`Server running port ${this.port}`);
+    public async bootstrap() {
+        const schema = await buildSchema({
+            resolvers: this.resolvers as any,
         });
+        const server = new ApolloServer({
+            schema,
+            csrfPrevention: true,
+            cache: 'bounded',
+            introspection: false,
+            plugins: [
+                ApolloServerPluginLandingPageGraphQLPlayground({
+                    settings: {
+                        'schema.polling.enable': false,
+                    },
+                }),
+            ],
+        });
+        await server.start();
+        server.applyMiddleware({ app: this.app });
+        await new Promise<void>((resolve) =>
+            this.app.listen(
+                { port: this.port, path: this.graphQLPath },
+                resolve
+            )
+        );
+        console.log(
+            `🚀 Server ready at http://localhost:${this.port}${server.graphqlPath}`
+        );
+        console.log(
+            `🚀Playground:  https://studio.apollographql.com/sandbox/explorer`
+        );
     }
-
     private initializeMiddleware(): void {
-        this.app.use(helmet());
+        const devContentSecurityPolicy = {
+            directives: {
+                scriptSrc: [
+                    "'self'",
+                    "'unsafe-inline'",
+                    'https://cdn.jsdelivr.net',
+                ],
+                imgSrc: ["'self'", 'data:', 'https://cdn.jsdelivr.net'],
+            },
+        };
+        const IS_DEV = process.env.NODE_ENV !== 'production';
+        this.app.use(
+            helmet({
+                contentSecurityPolicy: IS_DEV
+                    ? devContentSecurityPolicy
+                    : undefined,
+            })
+        );
+
         this.app.use(cors());
         this.app.use(morgan('dev'));
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: false }));
         this.app.use(compression());
-        // this.app.use(
-        //     express.static(path.join(__dirname, '..', '..', 'testClient'))
-        // );
-        // this.app.get('/', (req, res) => {
-        //     res.sendFile(
-        //         path.join(__dirname, '..', '..', 'testClient', 'index.html')
-        //     );
-        // });
-
-        // this.app.post('/single', multerUpload.single('avatar'), (req, res) => {
-        //     console.log(req.file);
-        //     res.send('single fle upload success');
-        // });
         this.app.use(
             '/healthCheck',
             healthCheck({
@@ -66,20 +107,6 @@ class App {
         );
 
         this.app.use(ErrorMiddleware);
-    }
-
-    private initializeControllers(controllers: Controller[]): void {
-        controllers.forEach((controller: Controller) => {
-            this.app.use('/api', controller.router);
-        });
-        this.app.use((req, res, next) => {
-            const error = new Error('Not found');
-
-            res.status(404).json({
-                message: error.message,
-                status: 404,
-            });
-        });
     }
 
     private logRequests(): void {
