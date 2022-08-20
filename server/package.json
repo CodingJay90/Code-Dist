@@ -7,11 +7,11 @@
     "start": "node dist/index.js",
     "dev-watch": "tsc-watch --onSuccess \"node ./dist/index.js\"",
     "dev": "tsc -w & nodemon -q -w dist dist/index.js",
-    "build2": "babel --extensions .ts ./source -d dist",
+    "build": "npm run compiler",
+    "babel-build": "babel --extensions .ts ./source -d dist",
     "postinstall": "npm run build",
     "clean": "rimraf esm",
-    "compiler": "npm run clean && tsc --pretty && babel --extensions '.ts' source -d esm",
-    "build": "npm run compiler"
+    "compiler": "npm run clean && tsc --pretty && babel --extensions '.ts' source -d esm"
   },
   "repository": {
     "type": "git",
@@ -32,6 +32,8 @@
     "envalid": "^7.3.1",
     "express": "^4.18.1",
     "express-healthcheck": "^0.1.0",
+    "fs-extra": "^10.1.0",
+    "fs-jetpack": "^4.3.1",
     "helmet": "^5.1.1",
     "joi": "^17.6.0",
     "jsonwebtoken": "^8.5.1",
@@ -62,5 +64,12 @@
     "@types/unzipper": "^0.10.5",
     "tsc-watch": "^5.0.3",
     "typescript": "^4.7.4"
+  },
+  "_moduleAliases": {
+    "@/config": "dist/config",
+    "@/resources": "dist/resources",
+    "@/middleware": "dist/middleware",
+    "@/types": "dist/utils/interfaces",
+    "@/utils": "dist/utils"
   }
 }

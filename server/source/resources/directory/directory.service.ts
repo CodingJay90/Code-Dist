@@ -12,24 +12,6 @@ import {
     ZipEntry,
 } from '@/resources/directory/directory.interface';
 
-/*
- const loopThrough = () => {
-            const sorted = listDirectories.map((dir, index, dirs) => {
-                let currentIndex = dirs.indexOf(dir);
-                let nextArrayIndex = (currentIndex + 1) % dirs.length;
-                const nextElement = dirs[nextArrayIndex].entryName;
-                if (nextElement.includes(dir.entryName)) {
-                    dir.childDir.push(nextElement);
-                    dirs.splice(dirs.indexOf(dirs[nextArrayIndex]), 1);
-                }
-                if (index === dirs.length) loopThrough();
-                return dir;
-            });
-            return sorted;
-        };
-        return loopThrough();
-*/
-
 class DirectoryService {
     //Read all contents in a zip file
     public async readZip(pathToDir: string): Promise<FileEntry[]> {
