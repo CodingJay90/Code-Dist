@@ -6,7 +6,7 @@ import { Field, ObjectType, InputType, InterfaceType, ID } from 'type-graphql';
 import { File } from '@/graphql/file/file.schema';
 
 @ObjectType()
-class DirectoryType implements IDirectory {
+export class Directory implements IDirectory {
     @Field((type) => ID)
     directory_id!: string;
 
@@ -19,26 +19,26 @@ class DirectoryType implements IDirectory {
     @Field()
     isDirectory!: boolean;
 
-    @Field((type) => [DirectoryType])
-    sub_directory!: DirectoryType[];
+    @Field((type) => [Directory])
+    sub_directory!: Directory[];
 
     @Field((type) => [File])
     files!: File[];
 }
 
-@ObjectType()
-export class Directory
-    implements Pick<DirectoryMongooseDocument, 'user_id' | 'directory_id'>
-{
-    @Field()
-    user_id!: string;
+// @ObjectType()
+// export class Directory
+//     implements Pick<DirectoryMongooseDocument, 'user_id' | 'directory_id'>
+// {
+//     @Field()
+//     user_id!: string;
 
-    @Field()
-    directory_id!: string;
+//     @Field()
+//     directory_id!: string;
 
-    @Field((type) => [DirectoryType])
-    directories!: DirectoryType[];
-}
+//     @Field((type) => [DirectoryType])
+//     directories!: DirectoryType[];
+// }
 // @ObjectType()
 // export class Directory
 //     extends DirectoryType

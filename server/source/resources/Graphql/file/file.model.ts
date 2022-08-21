@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
 import { nanoid } from 'nanoid';
 import { FileMongooseDocument } from '@/resources/file/file.interface';
 
-export const FileSchema = new Schema(
+const FileSchema = new Schema(
     {
         file_type: {
             type: String,
@@ -28,4 +28,6 @@ export const FileSchema = new Schema(
     { timestamps: true }
 );
 
-export default model<FileMongooseDocument>('File', FileSchema);
+const FileModel = model<FileMongooseDocument>('File', FileSchema);
+
+export { FileModel, FileSchema };

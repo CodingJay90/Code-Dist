@@ -8,7 +8,10 @@ import {
     IDirectory,
     ZipEntry,
 } from '@/graphql/directory/directory.interface';
-import DirectoryModel from '@/graphql/directory/directory.model';
+import {
+    DirectoryModel,
+    DirectoryTreeModel,
+} from '@/graphql/directory/directory.model';
 
 class DirectoryService {
     //Read all contents in a zip file
@@ -33,7 +36,7 @@ class DirectoryService {
         // return main();
     }
 
-    private formatDirectoryStructure(directory: FileEntry): IDirectory {
+    public formatDirectoryStructure(directory: FileEntry): IDirectory {
         return {
             directory_name:
                 directory.entryName.split('/')[
@@ -48,7 +51,7 @@ class DirectoryService {
     }
 
     public async listDirectoriesInExtractedZip(
-        fileEntries: FileEntry[]
+        fileEntries: IDirectory[]
     ): Promise<IDirectory[]> {
         let listDirectories = fileEntries.filter((i) => i.isDirectory).sort();
         let addedChildDirectory: Array<string> = [];
@@ -57,8 +60,8 @@ class DirectoryService {
             while (indexCount < dirs.length) {
                 const nextElement = dirs[indexCount];
                 //split the path(entryName string) into array in order to compare
-                const currentDirComparison = dir.entryName.split('/');
-                const nextDirComparison = nextElement.entryName.split('/');
+                const currentDirComparison = dir.directory_path.split('/');
+                const nextDirComparison = nextElement.directory_path.split('/');
                 /*
                     compare both arrays
                     e.g: currentDirComparison =  [ 'testZip', 'client', 'public', '' ]
@@ -83,23 +86,41 @@ class DirectoryService {
                         )
                     )
                 ) {
-                    dir['sub_directory']?.push(
-                        this.formatDirectoryStructure(nextElement)
-                    );
-                    addedChildDirectory.push(nextElement.entryName);
+                    // (async () => {
+                    //     console.log('test');
+                    //     const found = await DirectoryModel.findOne({
+                    //         directoryPath: currentDirComparison.splice(
+                    //             0,
+                    //             currentDirComparison.length - 1
+                    //         ),
+                    //     });
+                    //     // if (found) {
+                    //     //     found.sub_directory.push(
+                    //     //         this.formatDirectoryStructure(nextElement)
+                    //     //             ?._id || ''
+                    //     //     );
+                    //     //     await found.save();
+                    //     // }
+                    //     // console.log(found);
+                    // })();
+                    // dir['sub_directory']?.push(
+                    //     this.formatDirectoryStructure(nextElement)
+                    // );
+                    dir['sub_directory']?.push(nextElement);
+                    addedChildDirectory.push(nextElement.directory_path);
                 }
                 indexCount++;
             }
             return dir;
         });
         return sorted
-            .filter((i) => !addedChildDirectory.includes(i.entryName))
-            .map((i) => this.formatDirectoryStructure(i));
+            .filter((i) => !addedChildDirectory.includes(i.directory_path))
+            .map((i) => i);
     }
 
     //MONGOOSE SERVICES
     public async getDirectories(
-        query: FilterQuery<DirectoryMongooseDocument>,
+        query: FilterQuery<IDirectory>,
         options: QueryOptions = { lean: true }
     ) {
         return DirectoryModel.find(query, {}, options);

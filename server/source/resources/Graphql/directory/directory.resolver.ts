@@ -3,7 +3,11 @@ import { baseDirectory } from '@/utils/constants';
 import { multerUpload } from '@/middleware/multer.middleware';
 import { Directory } from '@/graphql/directory/directory.schema';
 import DirectoryService from '@/graphql/directory/directory.service';
-import DirectoryModel from '@/graphql/directory/directory.model';
+import {
+    DirectoryModel,
+    DirectoryTreeModel,
+} from '@/graphql/directory/directory.model';
+import { FileModel, FileSchema } from '@/graphql/file/file.model';
 import FileService from '@/graphql/file/file.service';
 // import { finished } from 'stream/promises';
 
@@ -32,14 +36,24 @@ export class DirectoryResolver {
 
     @Query(() => [Directory])
     async getDirectoryTree() {
-        const data = await this.DirectoryService.getDirectories({});
-        return data;
+        // const data = await this.DirectoryService.getDirectories({});
+        const directories = await this.DirectoryService.getDirectories({});
+        const files = await this.FileService.getFiles({});
+        const mergedFilesAndFolders = this.FileService.addFilesToDirectory(
+            directories,
+            files
+        );
+        const extractedDirectories =
+            await this.DirectoryService.listDirectoriesInExtractedZip(
+                mergedFilesAndFolders
+            );
+        return extractedDirectories;
     }
 
     @Mutation(() => Boolean)
     async createDirectory() {
         const data = await this.DirectoryService.getDirectories({
-            directory_id: 'directory-CYg1H676Zc',
+            _id: '6302891a2aafafe5aa8fd819',
         });
         console.log(data);
         return true;
@@ -62,19 +76,31 @@ export class DirectoryResolver {
                 .on('finish', async () => {
                     //Read the uploaded zip file and save the returned json to db
                     const data = await this.DirectoryService.readZip(pathToDir);
-                    const mergedFilesAndFolders =
-                        this.FileService.addFilesToDirectory(
-                            data.filter((i) => i.isDirectory),
-                            data.filter((i) => !i.isDirectory)
-                        );
-                    const extractedDirectories =
-                        await this.DirectoryService.listDirectoriesInExtractedZip(
-                            mergedFilesAndFolders
-                        );
-                    await DirectoryModel.deleteMany({}); //TBD: clear the last uploaded and not all collections
-                    await DirectoryModel.create({
-                        directories: extractedDirectories,
-                    });
+                    const directories = data.filter((i) => i.isDirectory);
+                    const files = data.filter((i) => !i.isDirectory);
+                    DirectoryModel.create(
+                        directories.map((i) =>
+                            this.DirectoryService.formatDirectoryStructure(i)
+                        )
+                    );
+                    FileModel.create(
+                        files.map((i) =>
+                            this.FileService.formatFileStructure(i)
+                        )
+                    );
+                    // const mergedFilesAndFolders =
+                    //     this.FileService.addFilesToDirectory(
+                    //         data.filter((i) => i.isDirectory),
+                    //         data.filter((i) => !i.isDirectory)
+                    //     );
+                    // const extractedDirectories =
+                    //     await this.DirectoryService.listDirectoriesInExtractedZip(
+                    //         mergedFilesAndFolders
+                    //     );
+                    // await DirectoryTreeModel.deleteMany({}); //TBD: clear the last uploaded and not all collections
+                    // await DirectoryTreeModel.create({
+                    //     directories: extractedDirectories,
+                    // });
                     resolve(true);
                 })
                 .on('close', () => resolve(true))

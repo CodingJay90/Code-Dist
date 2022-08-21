@@ -2,6 +2,7 @@ import { Document } from 'mongoose';
 import { IZipEntry } from 'adm-zip';
 import { IFile } from '@/resources/file/file.interface';
 export interface IDirectory {
+    _id?: string;
     directory_name: string;
     directory_path: string;
     directory_id: string;

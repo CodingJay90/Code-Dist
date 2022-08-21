@@ -4,9 +4,9 @@ import {
     IDirectory,
     DirectoryMongooseDocument,
 } from '@/graphql/directory/directory.interface';
-import fileModel, { FileSchema } from '@/graphql/file/file.model';
+import { FileSchema } from '@/graphql/file/file.model';
 
-const DirectoryTree = new Schema({
+const DirectorySchema = new Schema({
     directory_id: {
         type: String,
         default: `directory-${nanoid(10)}`,
@@ -21,10 +21,14 @@ const DirectoryTree = new Schema({
         type: Boolean,
     },
     files: [FileSchema],
-    sub_directory: [this],
+    // sub_directory: [this],
 });
 
-const DirectorySchema = new Schema(
+DirectorySchema.add({
+    sub_directory: [DirectorySchema],
+});
+
+const DirectoryTreeSchema = new Schema(
     {
         user_id: {
             type: String,
@@ -34,18 +38,18 @@ const DirectorySchema = new Schema(
             type: String,
             default: `rootDir-${nanoid(10)}`,
         },
-        directories: [DirectoryTree],
+        directories: [DirectorySchema],
     },
     { timestamps: true }
 );
 
-// DirectorySchema.add({
-//     sub_directory: [DirectorySchema],
-// });
-
-const DirectoryModel = model<DirectoryMongooseDocument>(
-    'Directory',
-    DirectorySchema
+const DirectoryTreeModel = model<DirectoryMongooseDocument>(
+    'DirectoryTree',
+    DirectoryTreeSchema
 );
 
-export default DirectoryModel;
+const DirectoryModel = model<IDirectory>('Directory', DirectorySchema);
+
+export { DirectoryTreeModel, DirectoryModel };
+
+// export default DirectoryModel;

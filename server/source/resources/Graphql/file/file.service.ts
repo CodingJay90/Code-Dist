@@ -5,38 +5,52 @@ import {
     FileEntry,
     IDirectory,
     ZipEntry,
-} from '@/resources/directory/directory.interface';
-import { IFile } from '@/resources/file/file.interface';
+} from '@/graphql/directory/directory.interface';
+import { IFile } from '@/graphql/file/file.interface';
 import { nanoid } from 'nanoid';
+import { FilterQuery, QueryOptions } from 'mongoose';
+import { FileModel } from '@/graphql/file/file.model';
 class FileService {
     constructor() {}
 
+    public formatFileStructure(file: FileEntry): IFile {
+        return {
+            file_name: file.name,
+            file_dir: file.entryName,
+            file_id: `file-${nanoid(10)}`,
+            file_type: file.entryName.split('.').pop() || 'txt',
+            file_content: file.fileContent || '',
+            isDirectory: file.isDirectory,
+        };
+    }
+
     public addFilesToDirectory(
-        directories: FileEntry[],
-        files: FileEntry[]
-    ): FileEntry[] {
+        directories: IDirectory[],
+        files: IFile[]
+    ): IDirectory[] {
         const mapped = directories.map((directory) => {
             files.forEach((file) => {
                 if (
-                    `${file.entryName
+                    `${file.file_dir
                         .split('/')
-                        .splice(0, file.entryName.split('/').length - 1)
-                        .join('/')}/` === directory.entryName
+                        .splice(0, file.file_dir.split('/').length - 1)
+                        .join('/')}/` === directory.directory_path
                 ) {
-                    directory['files']?.push({
-                        file_name: file.name,
-                        file_dir: file.entryName,
-                        file_id: `file-${nanoid(10)}`,
-                        file_type: file.entryName.split('.').pop() || 'txt',
-                        file_content: file.fileContent || '',
-                        isDirectory: file.isDirectory,
-                    });
+                    directory['files']?.push(file);
                 }
             });
 
             return directory;
         });
         return mapped;
+    }
+
+    //MONGOOSE SERVICES
+    public async getFiles(
+        query: FilterQuery<IFile>,
+        options: QueryOptions = { lean: true }
+    ) {
+        return FileModel.find(query, {}, options);
     }
 
     getDir(filePath: string) {
