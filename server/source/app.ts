@@ -6,18 +6,17 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import { buildSchema } from 'type-graphql';
 import { ApolloServer } from 'apollo-server-express';
-// import { ApolloServer } from 'apollo-server';
+// import { GraphQLUpload, graphqlUploadExpress } from 'graphql-upload';
+// @ts-ignore
+import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
 import {
     ApolloServerPluginLandingPageGraphQLPlayground,
     ApolloServerPluginLandingPageLocalDefault,
     ApolloServerPluginLandingPageProductionDefault,
 } from 'apollo-server-core';
-
-import Controller from '@/types/controller.interface';
 import logger from './config/logger';
 import ErrorMiddleware from '@/middleware/error.middleware';
 import connectDb from '@/config/db';
-import { UsersResolver } from './user.resolver';
 
 const NAMESPACE = 'Server';
 
@@ -43,7 +42,7 @@ class App {
         });
         const server = new ApolloServer({
             schema,
-            csrfPrevention: true,
+            // csrfPrevention: true,
             cache: 'bounded',
             // introspection: false,
             plugins: [
@@ -54,6 +53,7 @@ class App {
                 }),
             ],
         });
+        this.app.use(graphqlUploadExpress());
         await server.start();
         server.applyMiddleware({ app: this.app });
         await new Promise<void>((resolve) =>

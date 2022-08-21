@@ -1,10 +1,22 @@
-import { IDirectory } from '@/resources/directory/directory.interface';
-import { IFile } from '@/resources/file/file.interface';
+import { IDirectory } from '@/graphql/directory/directory.interface';
 import { Field, ObjectType, InputType, InterfaceType, ID } from 'type-graphql';
+import { File } from '@/graphql/file/file.schema';
 
 @ObjectType()
-class IDirectoryGraphQL {
+class DirectoryUpload {
     @Field()
+    filename!: string;
+
+    @Field()
+    mimetype!: string;
+
+    @Field()
+    encoding!: string;
+}
+
+@ObjectType()
+class DirectoryType {
+    @Field((type) => ID)
     directory_id!: string;
 
     @Field()
@@ -18,23 +30,13 @@ class IDirectoryGraphQL {
 }
 
 @ObjectType()
-export class Directory extends IDirectoryGraphQL {
-    @Field()
-    directory_iud!: string;
+export class Directory
+    extends DirectoryType
+    implements Omit<IDirectory, 'sub_directory'>
+{
+    @Field((type) => [DirectoryType])
+    sub_directory!: DirectoryType[];
 
-    @Field((type) => [IDirectoryGraphQL])
-    sub_directory!: IDirectoryGraphQL[];
+    @Field((type) => [File])
+    files!: File[];
 }
-// @Field()
-// sub_directory!: IDirectory[];
-
-// @InputType()
-// export class UserInput
-//     implements Pick<Directory, 'directory_name' | 'directory_path'>
-// {
-//     @Field()
-//     directory_name!: string;
-
-//     @Field()
-//     directory_path!: string;
-// }
