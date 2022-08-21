@@ -15,27 +15,8 @@ class FileService {
         directories: FileEntry[],
         files: FileEntry[]
     ): FileEntry[] {
-        console.log(
-            files
-                .map((i) => i.entryName)
-                .map((file) => {
-                    console.log(
-                        `${file
-                            .split('/')
-                            .splice(0, file.split('/').length - 1)
-                            .join('/')}`
-                    );
-                    return file;
-                })
-        );
         const mapped = directories.map((directory) => {
             files.forEach((file) => {
-                // console.log(
-                //     `${file.entryName
-                //         .split('/')
-                //         .splice(0, file.entryName.split('/').length - 2)
-                //         .join('/')}/`
-                // );
                 if (
                     `${file.entryName
                         .split('/')
@@ -50,7 +31,6 @@ class FileService {
                         file_content: file.fileContent || '',
                         isDirectory: file.isDirectory,
                     });
-                    // console.log(file.entryName, directory.entryName);
                 }
             });
 
@@ -84,7 +64,6 @@ class FileService {
                 fileType,
             };
         } catch (error) {
-            // console.log("rrr");
             throw error;
         }
     }
@@ -93,7 +72,6 @@ class FileService {
         let filenames = fs
             .readdirSync(dir, { withFileTypes: true })
             .filter((i) => !i.isDirectory());
-        // console.log(filenames);
         return filenames;
     }
 

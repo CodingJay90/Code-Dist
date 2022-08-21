@@ -55,12 +55,33 @@ export class DirectoryResolver {
         const { createReadStream, filename, mimetype, encoding } = await file;
         const pathToDir = `${baseDirectory}/${filename}`;
         console.log(file);
-        return new Promise(async (resolve, reject) =>
+        if (mimetype !== 'application/zip')
+            return new Promise((_, reject) =>
+                reject('Uploaded folder/file must be in a zip format')
+            );
+        return new Promise(async (resolve, reject) => {
             createReadStream()
                 .pipe(createWriteStream(pathToDir))
-                .on('finish', () => resolve(true))
+                .on('finish', async () => {
+                    //Read the uploaded zip file and save the returned json to db
+                    const data = await this.DirectoryService.readZip(pathToDir);
+                    const mergedFilesAndFolders =
+                        this.FileService.addFilesToDirectory(
+                            data.filter((i) => i.isDirectory),
+                            data.filter((i) => !i.isDirectory)
+                        );
+                    const extractedDirectories =
+                        await this.DirectoryService.listDirectoriesInExtractedZip(
+                            mergedFilesAndFolders
+                        );
+                    await DirectoryModel.deleteMany({}); //TBD: clear the last uploaded and not all collections
+                    await DirectoryModel.create({
+                        directories: extractedDirectories,
+                    });
+                    resolve(true);
+                })
                 .on('close', () => resolve(true))
-                .on('error', () => reject(false))
-        );
+                .on('error', () => reject(false));
+        });
     }
 }
