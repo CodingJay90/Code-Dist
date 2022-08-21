@@ -1,11 +1,10 @@
 import { Schema, model } from 'mongoose';
 import { nanoid } from 'nanoid';
-import { IFile } from '@/resources/file/file.interface';
 import {
     IDirectory,
     DirectoryMongooseDocument,
-} from '@/resources/directory/directory.interface';
-import fileModel, { FileSchema } from '@/resources/file/file.model';
+} from '@/graphql/directory/directory.interface';
+import fileModel, { FileSchema } from '@/graphql/file/file.model';
 
 const DirectoryTree = new Schema({
     directory_id: {
@@ -30,6 +29,10 @@ const DirectorySchema = new Schema(
         user_id: {
             type: String,
             default: `user-${nanoid(10)}`,
+        },
+        directory_id: {
+            type: String,
+            default: `rootDir-${nanoid(10)}`,
         },
         directories: [DirectoryTree],
     },

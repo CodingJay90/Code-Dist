@@ -32,19 +32,21 @@ export class DirectoryResolver {
 
     @Query(() => [Directory])
     async getDirectoryTree() {
-        const pathToDir = `${baseDirectory}/updated.zip`;
-        const data = await this.DirectoryService.readZip(pathToDir);
-        const mergedFilesAndFolders = this.FileService.addFilesToDirectory(
-            data.filter((i) => i.isDirectory),
-            data.filter((i) => !i.isDirectory)
-        );
-        const extractedDirectories =
-            await this.DirectoryService.listDirectoriesInExtractedZip(
-                mergedFilesAndFolders
-            );
-        await DirectoryModel.deleteMany({});
-        await DirectoryModel.create({ directories: extractedDirectories });
-        return extractedDirectories;
+        const data = await this.DirectoryService.getDirectories({});
+        console.log(data);
+        // const pathToDir = `${baseDirectory}/updated.zip`;
+        // const data = await this.DirectoryService.readZip(pathToDir);
+        // const mergedFilesAndFolders = this.FileService.addFilesToDirectory(
+        //     data.filter((i) => i.isDirectory),
+        //     data.filter((i) => !i.isDirectory)
+        // );
+        // const extractedDirectories =
+        //     await this.DirectoryService.listDirectoriesInExtractedZip(
+        //         mergedFilesAndFolders
+        //     );
+        // await DirectoryModel.deleteMany({});
+        // await DirectoryModel.create({ directories: extractedDirectories });
+        return data;
     }
 
     @Mutation(() => Boolean)

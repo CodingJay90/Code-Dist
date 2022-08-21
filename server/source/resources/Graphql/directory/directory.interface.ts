@@ -18,6 +18,7 @@ export interface ZipEntry extends IZipEntry {
 
 export interface DirectoryMongooseDocument extends Document {
     user_id: string;
+    directory_id?: string;
     directories: IDirectory[];
 }
 

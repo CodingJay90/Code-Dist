@@ -1,21 +1,12 @@
-import { IDirectory } from '@/graphql/directory/directory.interface';
+import {
+    IDirectory,
+    DirectoryMongooseDocument,
+} from '@/graphql/directory/directory.interface';
 import { Field, ObjectType, InputType, InterfaceType, ID } from 'type-graphql';
 import { File } from '@/graphql/file/file.schema';
 
 @ObjectType()
-class DirectoryUpload {
-    @Field()
-    filename!: string;
-
-    @Field()
-    mimetype!: string;
-
-    @Field()
-    encoding!: string;
-}
-
-@ObjectType()
-class DirectoryType {
+class DirectoryType implements IDirectory {
     @Field((type) => ID)
     directory_id!: string;
 
@@ -27,16 +18,35 @@ class DirectoryType {
 
     @Field()
     isDirectory!: boolean;
-}
 
-@ObjectType()
-export class Directory
-    extends DirectoryType
-    implements Omit<IDirectory, 'sub_directory'>
-{
     @Field((type) => [DirectoryType])
     sub_directory!: DirectoryType[];
 
     @Field((type) => [File])
     files!: File[];
 }
+
+@ObjectType()
+export class Directory
+    implements Pick<DirectoryMongooseDocument, 'user_id' | 'directory_id'>
+{
+    @Field()
+    user_id!: string;
+
+    @Field()
+    directory_id!: string;
+
+    @Field((type) => [DirectoryType])
+    directories!: DirectoryType[];
+}
+// @ObjectType()
+// export class Directory
+//     extends DirectoryType
+//     implements Omit<IDirectory, 'sub_directory'>
+// {
+// @Field((type) => [DirectoryType])
+// sub_directory!: DirectoryType[];
+
+// @Field((type) => [File])
+// files!: File[];
+// }

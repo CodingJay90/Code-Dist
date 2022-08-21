@@ -1,16 +1,14 @@
-import fs from 'fs';
-import path from 'path';
-import fse from 'fs-extra';
-import { baseDirectory } from '@/utils/constants.js';
+import { FilterQuery, QueryOptions } from 'mongoose';
 import { nanoid } from 'nanoid';
 import unZipper from 'unzipper';
-import AdmZip, { IZipEntry } from 'adm-zip';
-import { ErrorResponse } from '@/utils/exceptions/http.exceptions';
+import AdmZip from 'adm-zip';
 import {
+    DirectoryMongooseDocument,
     FileEntry,
     IDirectory,
     ZipEntry,
-} from '@/resources/directory/directory.interface';
+} from '@/graphql/directory/directory.interface';
+import DirectoryModel from '@/graphql/directory/directory.model';
 
 class DirectoryService {
     //Read all contents in a zip file
@@ -97,6 +95,14 @@ class DirectoryService {
         return sorted
             .filter((i) => !addedChildDirectory.includes(i.entryName))
             .map((i) => this.formatDirectoryStructure(i));
+    }
+
+    //MONGOOSE SERVICES
+    public async getDirectories(
+        query: FilterQuery<DirectoryMongooseDocument>,
+        options: QueryOptions = { lean: true }
+    ) {
+        return DirectoryModel.find(query, {}, options);
     }
 }
 
