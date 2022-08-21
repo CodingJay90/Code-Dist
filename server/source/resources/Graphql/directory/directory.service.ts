@@ -15,10 +15,10 @@ class DirectoryService {
     public async readZip(pathToDir: string): Promise<FileEntry[]> {
         const zip = new AdmZip(pathToDir);
         const zipEntries = zip.getEntries();
-        async function main() {
-            const directory = await unZipper.Open.file(pathToDir);
-            return directory;
-        }
+        // async function main() {
+        //     const directory = await unZipper.Open.file(pathToDir);
+        //     return directory;
+        // }
         return zipEntries.map((i: ZipEntry) => {
             if (!i.isDirectory) i.fileContent = i.getData().toString();
             return {
