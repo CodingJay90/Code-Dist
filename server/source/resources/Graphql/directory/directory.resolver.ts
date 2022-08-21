@@ -1,7 +1,10 @@
 import { Query, Resolver, Mutation, Arg } from 'type-graphql';
 import { baseDirectory } from '@/utils/constants';
 import { multerUpload } from '@/middleware/multer.middleware';
-import { Directory } from '@/graphql/directory/directory.schema';
+import {
+    Directory,
+    DirectoryInput,
+} from '@/graphql/directory/directory.schema';
 import DirectoryService from '@/graphql/directory/directory.service';
 import {
     DirectoryModel,
@@ -36,7 +39,6 @@ export class DirectoryResolver {
 
     @Query(() => [Directory])
     async getDirectoryTree() {
-        // const data = await this.DirectoryService.getDirectories({});
         const directories = await this.DirectoryService.getDirectories({});
         const files = await this.FileService.getFiles({});
         const mergedFilesAndFolders = this.FileService.addFilesToDirectory(
@@ -50,13 +52,31 @@ export class DirectoryResolver {
         return extractedDirectories;
     }
 
-    @Mutation(() => Boolean)
-    async createDirectory() {
-        const data = await this.DirectoryService.getDirectories({
-            _id: '6302891a2aafafe5aa8fd819',
+    @Mutation(() => Directory)
+    async createDirectory(
+        @Arg('input') input: DirectoryInput
+    ): Promise<Directory | string> {
+        const { directory_name, directory_path } = input;
+        if (/(^[^/].*)(.*[/]$)/.exec(directory_path) === null) {
+            //match "this/format/"
+            return Promise.reject(
+                'directory_path argument must end with a forward slash and must not precede with a forward slash'
+            );
+        }
+        const newDirectory = await this.DirectoryService.createDirectory({
+            directory_name,
+            directory_path: `${directory_path}${directory_name}/`,
         });
-        console.log(data);
-        return true;
+        return newDirectory;
+        // const data = await DirectoryModel.findById('63029fdf264d0c6b5638f583');
+        // console.log(/(^[^/].*)(.*[/]$)/.exec(input.directory_path));
+        // // return /(^[^/].*)(.*[/]$)/.exec(input.directory_path);
+        // // return new Promise((resolve, reject) => {
+        // //     resolve(
+        // //         JSON.stringify(/(^[^/].*)(.*[/]$)/.exec(input.directory_path))
+        // //         );
+        // //     });
+        // return JSON.stringify(/(^[^/].*)(.*[/]$)/.exec(input.directory_path));
     }
 
     @Mutation(() => Boolean)

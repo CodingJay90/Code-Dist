@@ -16,9 +16,11 @@ const DirectorySchema = new Schema({
     },
     directory_path: {
         type: String,
+        unique: true,
     },
     isDirectory: {
         type: Boolean,
+        default: true,
     },
     files: [FileSchema],
     // sub_directory: [this],

@@ -49,5 +49,5 @@ mongoose.connection.on('reconnected', function () {
 });
 
 mongoose.set('autoIndex', true);
-mongoose.connection.dropDatabase(() => console.log('dropped'));
+// mongoose.connection.dropDatabase(() => console.log('dropped'));
 export default connectDb();

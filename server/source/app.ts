@@ -32,7 +32,6 @@ class App {
         this.resolvers = resolvers;
 
         connectDb;
-        this.logRequests();
         this.initializeMiddleware();
     }
 

@@ -1,4 +1,4 @@
-import { FilterQuery, QueryOptions } from 'mongoose';
+import { DocumentDefinition, FilterQuery, QueryOptions } from 'mongoose';
 import { nanoid } from 'nanoid';
 import unZipper from 'unzipper';
 import AdmZip from 'adm-zip';
@@ -124,6 +124,14 @@ class DirectoryService {
         options: QueryOptions = { lean: true }
     ) {
         return DirectoryModel.find(query, {}, options);
+    }
+
+    createDirectory(
+        input: DocumentDefinition<
+            Pick<IDirectory, 'directory_name' | 'directory_path'>
+        >
+    ) {
+        return DirectoryModel.create(input);
     }
 }
 

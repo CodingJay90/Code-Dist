@@ -50,3 +50,14 @@ export class Directory implements IDirectory {
 // @Field((type) => [File])
 // files!: File[];
 // }
+
+@InputType()
+export class DirectoryInput
+    implements Pick<Directory, 'directory_name' | 'directory_path'>
+{
+    @Field()
+    directory_name!: string;
+
+    @Field()
+    directory_path!: string;
+}
