@@ -1,4 +1,9 @@
-import { DocumentDefinition, FilterQuery, QueryOptions } from 'mongoose';
+import {
+    DocumentDefinition,
+    FilterQuery,
+    QueryOptions,
+    UpdateQuery,
+} from 'mongoose';
 import { nanoid } from 'nanoid';
 import unZipper from 'unzipper';
 import AdmZip from 'adm-zip';
@@ -126,12 +131,27 @@ class DirectoryService {
         return DirectoryModel.find(query, {}, options);
     }
 
-    createDirectory(
+    public async getDirectory(
+        query: FilterQuery<IDirectory>,
+        options: QueryOptions = { lean: true }
+    ) {
+        return DirectoryModel.findOne(query, {}, options);
+    }
+
+    public async createDirectory(
         input: DocumentDefinition<
             Pick<IDirectory, 'directory_name' | 'directory_path'>
         >
     ) {
         return DirectoryModel.create(input);
+    }
+
+    public async findAndUpdate(
+        query: FilterQuery<IDirectory>,
+        update: UpdateQuery<IDirectory>,
+        options?: QueryOptions
+    ) {
+        return DirectoryModel.findOneAndUpdate(query, update, options);
     }
 }
 

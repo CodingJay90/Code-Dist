@@ -4,6 +4,7 @@ import { multerUpload } from '@/middleware/multer.middleware';
 import {
     Directory,
     DirectoryInput,
+    RenameDirectoryInput,
 } from '@/graphql/directory/directory.schema';
 import DirectoryService from '@/graphql/directory/directory.service';
 import {
@@ -20,6 +21,7 @@ import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 import { finished } from 'stream/promises';
 import { FileUpload } from 'graphql-upload';
 import { createWriteStream } from 'fs';
+import mongoose, { isValidObjectId, ObjectId } from 'mongoose';
 // import FileUpload from 'graphql-upload/FileUpload.js';
 
 @Resolver(() => Directory)
@@ -49,34 +51,19 @@ export class DirectoryResolver {
             await this.DirectoryService.listDirectoriesInExtractedZip(
                 mergedFilesAndFolders
             );
-        return extractedDirectories;
-    }
+        // const unique = [
+        //     ...new Map(
+        //         extractedDirectories.map((i) => [i.directory_name, i])
+        //     ).values(),
+        // ];
+        const newArray = extractedDirectories.map((m) => [m.directory_path, m]);
+        const newMap = new Map(newArray as any);
+        const iterator = newMap.values();
+        const unique = [...(iterator as any)]; //this will only work when using es2015 or higher (set ""downlevelIteration": true" in tsconfig.json to use when target is lower than 3s2015)
 
-    @Mutation(() => Directory)
-    async createDirectory(
-        @Arg('input') input: DirectoryInput
-    ): Promise<Directory | string> {
-        const { directory_name, directory_path } = input;
-        if (/(^[^/].*)(.*[/]$)/.exec(directory_path) === null) {
-            //match "this/format/"
-            return Promise.reject(
-                'directory_path argument must end with a forward slash and must not precede with a forward slash'
-            );
-        }
-        const newDirectory = await this.DirectoryService.createDirectory({
-            directory_name,
-            directory_path: `${directory_path}${directory_name}/`,
-        });
-        return newDirectory;
-        // const data = await DirectoryModel.findById('63029fdf264d0c6b5638f583');
-        // console.log(/(^[^/].*)(.*[/]$)/.exec(input.directory_path));
-        // // return /(^[^/].*)(.*[/]$)/.exec(input.directory_path);
-        // // return new Promise((resolve, reject) => {
-        // //     resolve(
-        // //         JSON.stringify(/(^[^/].*)(.*[/]$)/.exec(input.directory_path))
-        // //         );
-        // //     });
-        // return JSON.stringify(/(^[^/].*)(.*[/]$)/.exec(input.directory_path));
+        // console.log(unique);
+
+        return unique;
     }
 
     @Mutation(() => Boolean)
@@ -126,5 +113,57 @@ export class DirectoryResolver {
                 .on('close', () => resolve(true))
                 .on('error', () => reject(false));
         });
+    }
+
+    @Mutation(() => String)
+    async createDirectory(
+        @Arg('input') input: DirectoryInput
+    ): Promise<string> {
+        const { directory_name, directory_path } = input;
+        if (/(^[^/].*)(.*[/]$)/.exec(directory_path) === null) {
+            //match "this/format/"
+            return Promise.reject(
+                'directory_path argument must end with a forward slash and must not precede with a forward slash'
+            );
+        }
+        const newDirectory = await this.DirectoryService.createDirectory({
+            directory_name,
+            directory_path: `${directory_path}${directory_name}/`,
+        });
+        return newDirectory._id;
+    }
+
+    @Mutation(() => String)
+    async renameDirectory(
+        @Arg('input') input: RenameDirectoryInput
+    ): Promise<string> {
+        const { directory_name, _id } = input;
+        if (/(^[^/].*)(.*[^/]$)/.exec(directory_name) === null) {
+            //must not include slashes
+            return Promise.reject('directory_name must not include slashes');
+        }
+        let mongo_id: string = _id || '';
+        if (!mongoose.Types.ObjectId.isValid(_id || ''))
+            mongo_id = new mongoose.Types.ObjectId()._id.toString(); // convert to a valid mongoObjectId to use on query if it isn't valid
+
+        const query = {
+            $or: [{ directory_id: _id }, { _id: mongo_id }], //query by directory_id or _id
+        };
+        const directory = await this.DirectoryService.getDirectory(query);
+        if (!directory)
+            return Promise.reject('Directory with the given id not found');
+        const splits = directory?.directory_path.split('/') || [];
+        splits.pop();
+        splits[splits.length - 1] = directory_name;
+        console.log(splits.join('/'));
+        const updatedDirectory = await this.DirectoryService.findAndUpdate(
+            query,
+            {
+                directory_path: splits.join('/'),
+                directory_name,
+            }
+            // { new: true }
+        );
+        return updatedDirectory?.directory_path || '';
     }
 }

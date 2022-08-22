@@ -20,7 +20,7 @@ class FileService {
             file_id: `file-${nanoid(10)}`,
             file_type: file.entryName.split('.').pop() || 'txt',
             file_content: file.fileContent || '',
-            isDirectory: file.isDirectory,
+            isDirectory: file.isDirectory || false,
         };
     }
 
