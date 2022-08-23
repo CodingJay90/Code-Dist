@@ -95,3 +95,8 @@ export class RenameDirectoryInput
     @Field()
     _id!: string;
 }
+@InputType()
+export class DeleteDirectoryInput implements Pick<Directory, '_id'> {
+    @Field()
+    _id!: string;
+}

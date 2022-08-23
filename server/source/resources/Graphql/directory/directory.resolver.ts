@@ -2,6 +2,7 @@ import { Query, Resolver, Mutation, Arg } from 'type-graphql';
 import { baseDirectory } from '@/utils/constants';
 import { multerUpload } from '@/middleware/multer.middleware';
 import {
+    DeleteDirectoryInput,
     Directory,
     DirectoryInput,
     RenameDirectoryInput,
@@ -23,6 +24,14 @@ import { FileUpload } from 'graphql-upload';
 import { createWriteStream } from 'fs';
 import mongoose, { isValidObjectId, ObjectId } from 'mongoose';
 // import FileUpload from 'graphql-upload/FileUpload.js';
+
+function transFormIdToMongooseId(id: string): string {
+    let mongo_id: string = id || '';
+    if (!mongoose.Types.ObjectId.isValid(id || ''))
+        mongo_id = new mongoose.Types.ObjectId().id.toString();
+
+    return mongo_id;
+}
 
 @Resolver(() => Directory)
 export class DirectoryResolver {
@@ -140,12 +149,9 @@ export class DirectoryResolver {
             //must not include slashes
             return Promise.reject('directory_name must not include slashes');
         }
-        let mongo_id: string = _id || '';
-        if (!mongoose.Types.ObjectId.isValid(_id || ''))
-            mongo_id = new mongoose.Types.ObjectId()._id.toString(); // convert to a valid mongoObjectId to use on query if it isn't valid
-
+        const id = transFormIdToMongooseId(_id);
         const query = {
-            $or: [{ directory_id: _id }, { _id: mongo_id }], //query by directory_id or _id
+            $or: [{ directory_id: id }, { _id: id }], //query by directory_id or _id
         };
         const directory = await this.DirectoryService.getDirectory(query);
         if (!directory)
@@ -163,5 +169,20 @@ export class DirectoryResolver {
             // { new: true }
         );
         return updatedDirectory?.directory_path || '';
+    }
+
+    @Mutation(() => Boolean)
+    async deleteDirectory(
+        @Arg('input') input: DeleteDirectoryInput
+    ): Promise<boolean> {
+        const id = transFormIdToMongooseId(input._id);
+        const query = {
+            $or: [{ directory_id: id }, { _id: id }], //query by directory_id or _id
+        };
+        const directory = await this.DirectoryService.getDirectory(query);
+        if (!directory)
+            return Promise.reject('Directory with the given id not found');
+        await this.DirectoryService.deleteDirectory(query);
+        return true;
     }
 }

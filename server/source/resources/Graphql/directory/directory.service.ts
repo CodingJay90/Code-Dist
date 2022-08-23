@@ -23,10 +23,6 @@ class DirectoryService {
     public async readZip(pathToDir: string): Promise<FileEntry[]> {
         const zip = new AdmZip(pathToDir);
         const zipEntries = zip.getEntries();
-        // async function main() {
-        //     const directory = await unZipper.Open.file(pathToDir);
-        //     return directory;
-        // }
         return zipEntries.map((i: ZipEntry) => {
             if (!i.isDirectory) i.fileContent = i.getData().toString();
             return {
@@ -91,26 +87,6 @@ class DirectoryService {
                         )
                     )
                 ) {
-                    // (async () => {
-                    //     console.log('test');
-                    //     const found = await DirectoryModel.findOne({
-                    //         directoryPath: currentDirComparison.splice(
-                    //             0,
-                    //             currentDirComparison.length - 1
-                    //         ),
-                    //     });
-                    //     // if (found) {
-                    //     //     found.sub_directory.push(
-                    //     //         this.formatDirectoryStructure(nextElement)
-                    //     //             ?._id || ''
-                    //     //     );
-                    //     //     await found.save();
-                    //     // }
-                    //     // console.log(found);
-                    // })();
-                    // dir['sub_directory']?.push(
-                    //     this.formatDirectoryStructure(nextElement)
-                    // );
                     dir['sub_directory']?.push(nextElement);
                     addedChildDirectory.push(nextElement.directory_path);
                 }
@@ -152,6 +128,12 @@ class DirectoryService {
         options?: QueryOptions
     ) {
         return DirectoryModel.findOneAndUpdate(query, update, options);
+    }
+    
+    public async deleteDirectory(
+        query: FilterQuery<IDirectory>,
+    ) {
+        return DirectoryModel.deleteOne(query);
     }
 }
 
