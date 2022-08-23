@@ -61,8 +61,6 @@ export class DirectoryResolver {
         const iterator = newMap.values();
         const unique = [...(iterator as any)]; //this will only work when using es2015 or higher (set ""downlevelIteration": true" in tsconfig.json to use when target is lower than 3s2015)
 
-        // console.log(unique);
-
         return unique;
     }
 

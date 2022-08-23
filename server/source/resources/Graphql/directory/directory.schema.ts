@@ -27,27 +27,27 @@ export class DirectoryType implements Omit<IDirectory, 'sub_directory'> {
 }
 
 @ObjectType()
-export class Directory extends DirectoryType {
-    // @Field((type) => ID)
-    // _id!: string;
+export class Directory implements IDirectory {
+    @Field((type) => ID)
+    _id!: string;
 
-    // @Field((type) => ID)
-    // directory_id!: string;
+    @Field((type) => ID)
+    directory_id!: string;
 
-    // @Field()
-    // directory_name!: string;
+    @Field()
+    directory_name!: string;
 
-    // @Field()
-    // directory_path!: string;
+    @Field()
+    directory_path!: string;
 
-    // @Field()
-    // isDirectory!: boolean;
+    @Field()
+    isDirectory!: boolean;
 
-    @Field((type) => [DirectoryType])
-    sub_directory!: DirectoryType[];
+    @Field((type) => [Directory])
+    sub_directory!: [Directory];
 
-    // @Field((type) => [File])
-    // files!: File[];
+    @Field((type) => [File])
+    files!: File[];
 }
 
 // @ObjectType()
