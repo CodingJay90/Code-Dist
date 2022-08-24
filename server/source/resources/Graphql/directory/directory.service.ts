@@ -17,6 +17,7 @@ import {
     DirectoryModel,
     DirectoryTreeModel,
 } from '@/graphql/directory/directory.model';
+import { removeTrailingSlash } from '@/utils/strings';
 
 class DirectoryService {
     //Read all contents in a zip file
@@ -61,29 +62,32 @@ class DirectoryService {
             while (indexCount < dirs.length) {
                 const nextElement = dirs[indexCount];
                 //split the path(entryName string) into array in order to compare
-                const currentDirComparison = dir.directory_path.split('/');
-                const nextDirComparison = nextElement.directory_path.split('/');
+                const directoryPath = removeTrailingSlash(dir.directory_path);
+                const nextElementPath = removeTrailingSlash(
+                    nextElement.directory_path
+                );
+                const currentDirComparison = directoryPath.split('/');
+                const nextDirComparison = nextElementPath.split('/');
                 /*
                     compare both arrays
-                    e.g: currentDirComparison =  [ 'testZip', 'client', 'public', '' ]
-                    e.g: nextDirComparison =  [ 'testZip', 'client', 'public', 'nestedInPublic', '' ]
+                    e.g: currentDirComparison =  [ 'testZip', 'client', 'public']
+                    e.g: nextDirComparison =  [ 'testZip', 'client', 'public', 'nestedInPublic']
                     
                     TODO:
-                    1)takeout the last item on currentDirComparison
-                    2)takeout the last 2 items on currentDirComparison (since paths are relative to each other)
-                    3)then compare both arrays, if match add to the current iteration(Directory)
+                    1)takeout the last item on currentDirComparison (since paths are relative to each other)
+                    2)then compare both arrays, if match add to the current iteration(Directory)
                 */
                 if (
                     JSON.stringify(
                         currentDirComparison.splice(
                             0,
-                            currentDirComparison.length - 1
+                            currentDirComparison.length
                         )
                     ) ===
                     JSON.stringify(
                         nextDirComparison.splice(
                             0,
-                            nextDirComparison.length - 2
+                            nextDirComparison.length - 1
                         )
                     )
                 ) {
@@ -129,10 +133,8 @@ class DirectoryService {
     ) {
         return DirectoryModel.findOneAndUpdate(query, update, options);
     }
-    
-    public async deleteDirectory(
-        query: FilterQuery<IDirectory>,
-    ) {
+
+    public async deleteDirectory(query: FilterQuery<IDirectory>) {
         return DirectoryModel.deleteOne(query);
     }
 }

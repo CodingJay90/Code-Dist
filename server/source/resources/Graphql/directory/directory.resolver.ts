@@ -5,6 +5,7 @@ import {
     DeleteDirectoryInput,
     Directory,
     DirectoryInput,
+    MoveDirectoryInput,
     RenameDirectoryInput,
 } from '@/graphql/directory/directory.schema';
 import DirectoryService from '@/graphql/directory/directory.service';
@@ -14,15 +15,14 @@ import {
 } from '@/graphql/directory/directory.model';
 import { FileModel, FileSchema } from '@/graphql/file/file.model';
 import FileService from '@/graphql/file/file.service';
-// import { finished } from 'stream/promises';
-
-// import { GraphQLUpload, graphqlUploadExpress } from 'graphql-upload';
 // @ts-ignore
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 import { finished } from 'stream/promises';
 import { FileUpload } from 'graphql-upload';
 import { createWriteStream } from 'fs';
 import mongoose, { isValidObjectId, ObjectId } from 'mongoose';
+import { IDirectory } from '@/graphql/directory/directory.interface';
+import { removeTrailingSlash } from '@/utils/strings';
 // import FileUpload from 'graphql-upload/FileUpload.js';
 
 function transFormIdToMongooseId(id: string): string {
@@ -32,7 +32,6 @@ function transFormIdToMongooseId(id: string): string {
 
     return mongo_id;
 }
-
 @Resolver(() => Directory)
 export class DirectoryResolver {
     private DirectoryService = new DirectoryService();
@@ -184,5 +183,66 @@ export class DirectoryResolver {
             return Promise.reject('Directory with the given id not found');
         await this.DirectoryService.deleteDirectory(query);
         return true;
+    }
+
+    @Mutation(() => [Directory])
+    async moveDirectory(@Arg('input') input: MoveDirectoryInput): Promise<any> {
+        let { destination_path, from_id } = input;
+        destination_path = removeTrailingSlash(destination_path);
+        const id = transFormIdToMongooseId(from_id);
+        const query = {
+            $or: [{ directory_id: id }, { _id: id }], //query by directory_id or _id
+        };
+        const directoryToMove = await this.DirectoryService.getDirectory(query); //get the directory to move
+        const directories = await this.DirectoryService.getDirectories({});
+        const files = await this.FileService.getFiles({});
+        if (!directoryToMove)
+            return Promise.reject('Directory with the given id not found');
+        const from = removeTrailingSlash(directoryToMove.directory_path).split(
+            '/'
+        );
+        const dest = destination_path.split('/');
+        const currentDirectoryName = from[from.length - 1];
+        const newDirectory = `${`${dest.join('/')}/`.concat(
+            currentDirectoryName
+        )}/`; // /newly/updated/path/
+
+        const filteredDirectories = directories
+            .filter((i) =>
+                i.directory_path.includes(directoryToMove.directory_path)
+            )
+            .map(async (i) => {
+                const childFrom = removeTrailingSlash(i.directory_path).split(
+                    '/'
+                );
+                const childDest = newDirectory.split('/');
+                const currentDirectoryName = childFrom[childFrom.length - 1];
+                const updatedDirectory = `${childDest
+                    .join('/')
+                    .concat(currentDirectoryName)}/`;
+                i.directory_path = updatedDirectory;
+                await this.DirectoryService.findAndUpdate(
+                    { _id: i._id },
+                    {
+                        directory_path:
+                            i._id.toString() === directoryToMove._id.toString()
+                                ? newDirectory
+                                : updatedDirectory,
+                    }
+                );
+                return i;
+            });
+        files
+            .filter((i) => i.file_dir.includes(directoryToMove.directory_path))
+            .map(async (i) => {
+                const split = i.file_dir.split('/');
+                const newFileDir = `${newDirectory}${split}`;
+                await this.FileService.findAndUpdate(
+                    { _id: i._id },
+                    { file_dir: newFileDir }
+                );
+                return i;
+            });
+        return filteredDirectories;
     }
 }
