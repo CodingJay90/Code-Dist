@@ -26,7 +26,16 @@ export class File implements IFile {
 }
 
 @InputType()
-export class GetDirectoryInput {
+export class GetFileInput {
     @Field()
     id!: string;
+}
+
+@InputType()
+export class CreateFileInput {
+    @Field()
+    file_name!: string;
+
+    @Field()
+    file_dir!: string;
 }

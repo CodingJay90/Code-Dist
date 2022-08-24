@@ -8,7 +8,12 @@ import {
 } from '@/graphql/directory/directory.interface';
 import { IFile } from '@/graphql/file/file.interface';
 import { nanoid } from 'nanoid';
-import { FilterQuery, QueryOptions, UpdateQuery } from 'mongoose';
+import {
+    DocumentDefinition,
+    FilterQuery,
+    QueryOptions,
+    UpdateQuery,
+} from 'mongoose';
 import { FileModel } from '@/graphql/file/file.model';
 class FileService {
     constructor() {}
@@ -58,6 +63,14 @@ class FileService {
         options: QueryOptions = { lean: true }
     ) {
         return FileModel.findOne(query, {}, options);
+    }
+
+    public async createFile(
+        input: DocumentDefinition<
+            Pick<IFile, 'file_name' | 'file_dir' | 'file_type'>
+        >
+    ) {
+        return FileModel.create(input);
     }
 
     public async findAndUpdate(
