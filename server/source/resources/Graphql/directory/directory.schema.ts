@@ -50,31 +50,6 @@ export class Directory implements IDirectory {
     files!: File[];
 }
 
-// @ObjectType()
-// export class Directory
-//     implements Pick<DirectoryMongooseDocument, 'user_id' | 'directory_id'>
-// {
-//     @Field()
-//     user_id!: string;
-
-//     @Field()
-//     directory_id!: string;
-
-//     @Field((type) => [DirectoryType])
-//     directories!: DirectoryType[];
-// }
-// @ObjectType()
-// export class Directory
-//     extends DirectoryType
-//     implements Omit<IDirectory, 'sub_directory'>
-// {
-// @Field((type) => [DirectoryType])
-// sub_directory!: DirectoryType[];
-
-// @Field((type) => [File])
-// files!: File[];
-// }
-
 @InputType()
 export class DirectoryInput
     implements Pick<Directory, 'directory_name' | 'directory_path'>
@@ -99,4 +74,13 @@ export class RenameDirectoryInput
 export class DeleteDirectoryInput implements Pick<Directory, '_id'> {
     @Field()
     _id!: string;
+}
+
+@InputType()
+export class MoveDirectoryInput {
+    @Field()
+    from_id!: string;
+
+    @Field()
+    destination_path!: string;
 }
