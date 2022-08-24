@@ -22,16 +22,9 @@ import { FileUpload } from 'graphql-upload';
 import { createWriteStream } from 'fs';
 import mongoose, { isValidObjectId, ObjectId } from 'mongoose';
 import { IDirectory } from '@/graphql/directory/directory.interface';
-import { removeTrailingSlash } from '@/utils/strings';
+import { removeTrailingSlash, transFormIdToMongooseId } from '@/utils/strings';
 // import FileUpload from 'graphql-upload/FileUpload.js';
 
-function transFormIdToMongooseId(id: string): string {
-    let mongo_id: string = id || '';
-    if (!mongoose.Types.ObjectId.isValid(id || ''))
-        mongo_id = new mongoose.Types.ObjectId().id.toString();
-
-    return mongo_id;
-}
 @Resolver(() => Directory)
 export class DirectoryResolver {
     private DirectoryService = new DirectoryService();
@@ -101,19 +94,6 @@ export class DirectoryResolver {
                             this.FileService.formatFileStructure(i)
                         )
                     );
-                    // const mergedFilesAndFolders =
-                    //     this.FileService.addFilesToDirectory(
-                    //         data.filter((i) => i.isDirectory),
-                    //         data.filter((i) => !i.isDirectory)
-                    //     );
-                    // const extractedDirectories =
-                    //     await this.DirectoryService.listDirectoriesInExtractedZip(
-                    //         mergedFilesAndFolders
-                    //     );
-                    // await DirectoryTreeModel.deleteMany({}); //TBD: clear the last uploaded and not all collections
-                    // await DirectoryTreeModel.create({
-                    //     directories: extractedDirectories,
-                    // });
                     resolve(true);
                 })
                 .on('close', () => resolve(true))
@@ -150,7 +130,7 @@ export class DirectoryResolver {
         }
         const id = transFormIdToMongooseId(_id);
         const query = {
-            $or: [{ directory_id: id }, { _id: id }], //query by directory_id or _id
+            $or: [{ directory_id: _id }, { _id: id }], //query by directory_id or _id
         };
         const directory = await this.DirectoryService.getDirectory(query);
         if (!directory)
@@ -176,7 +156,7 @@ export class DirectoryResolver {
     ): Promise<boolean> {
         const id = transFormIdToMongooseId(input._id);
         const query = {
-            $or: [{ directory_id: id }, { _id: id }], //query by directory_id or _id
+            $or: [{ directory_id: input._id }, { _id: id }], //query by directory_id or _id
         };
         const directory = await this.DirectoryService.getDirectory(query);
         if (!directory)
