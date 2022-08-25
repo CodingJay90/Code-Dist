@@ -27,6 +27,7 @@ import {
     CreateFileInput,
     File,
     GetFileInput,
+    RenameFileInput,
 } from '@/graphql/file/file.schema';
 import { IFile } from '@/graphql/file/file.interface';
 
@@ -55,14 +56,6 @@ export class FileResolver {
         const formattedDir = removeTrailingSlash(file_dir);
         if (!directoryToAddFile)
             return Promise.reject("Directory doesn't exist");
-        let newFileName = '';
-        let newFileExt = '';
-        if (file_name.split('.').length > 1) {
-            //e.g example.js
-            newFileExt = file_name.split('.').pop() || '';
-            newFileName = file_name;
-        }
-        const newFileDir = `{formattedDir}/{newFileName}`;
         const fileExtension =
             file_name.split('.').length > 1 ? file_name.split('.').pop() : '';
         const createdFile = await this.FileService.createFile({
@@ -72,4 +65,40 @@ export class FileResolver {
         });
         return createdFile._id;
     }
+
+    @Mutation(() => String)
+    async renameFile(@Arg('input') input: RenameFileInput): Promise<string> {
+        const { file_name, file_id } = input;
+        const id = transFormIdToMongooseId(file_id);
+        const query = {
+            $or: [{ file_id }, { _id: id }], //query by directory_id or _id
+        };
+        const file = await this.FileService.getFile(query);
+        if (!file) return Promise.reject('File not found');
+        const newFileDir = removeTrailingSlash(file.file_dir).split('/');
+        newFileDir.pop();
+        const fileExtension =
+            file_name.split('.').length > 1 ? file_name.split('.').pop() : '';
+        await this.FileService.findAndUpdate(query, {
+            file_name,
+            file_type: fileExtension,
+            file_dir: `${newFileDir.join('/')}/${file_name}`,
+        });
+        return file._id;
+    }
+
+    // @Mutation(() => Boolean)
+    // async deleteDirectory(
+    //     @Arg('input') input: DeleteDirectoryInput
+    // ): Promise<boolean> {
+    //     const id = transFormIdToMongooseId(input._id);
+    //     const query = {
+    //         $or: [{ directory_id: input._id }, { _id: id }], //query by directory_id or _id
+    //     };
+    //     const directory = await this.DirectoryService.getDirectory(query);
+    //     if (!directory)
+    //         return Promise.reject('Directory with the given id not found');
+    //     await this.DirectoryService.deleteDirectory(query);
+    //     return true;
+    // }
 }

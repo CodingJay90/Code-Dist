@@ -39,3 +39,11 @@ export class CreateFileInput {
     @Field()
     file_dir!: string;
 }
+@InputType()
+export class RenameFileInput {
+    @Field()
+    file_name!: string;
+
+    @Field()
+    file_id!: string;
+}
