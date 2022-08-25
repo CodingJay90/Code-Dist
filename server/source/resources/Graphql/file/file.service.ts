@@ -80,6 +80,10 @@ class FileService {
     ) {
         return FileModel.findOneAndUpdate(query, update, options);
     }
+
+    public async deleteFile(query: FilterQuery<IFile>) {
+        return FileModel.deleteOne(query);
+    }
 }
 
 export default FileService;

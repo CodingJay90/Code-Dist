@@ -25,6 +25,7 @@ import { IDirectory } from '@/graphql/directory/directory.interface';
 import { removeTrailingSlash, transFormIdToMongooseId } from '@/utils/strings';
 import {
     CreateFileInput,
+    DeleteFileInput,
     File,
     GetFileInput,
     RenameFileInput,
@@ -87,18 +88,15 @@ export class FileResolver {
         return file._id;
     }
 
-    // @Mutation(() => Boolean)
-    // async deleteDirectory(
-    //     @Arg('input') input: DeleteDirectoryInput
-    // ): Promise<boolean> {
-    //     const id = transFormIdToMongooseId(input._id);
-    //     const query = {
-    //         $or: [{ directory_id: input._id }, { _id: id }], //query by directory_id or _id
-    //     };
-    //     const directory = await this.DirectoryService.getDirectory(query);
-    //     if (!directory)
-    //         return Promise.reject('Directory with the given id not found');
-    //     await this.DirectoryService.deleteDirectory(query);
-    //     return true;
-    // }
+    @Mutation(() => Boolean)
+    async deleteFile(@Arg('input') input: DeleteFileInput): Promise<boolean> {
+        const id = transFormIdToMongooseId(input.file_id);
+        const query = {
+            $or: [{ file_id: input.file_id }, { _id: id }], //query by directory_id or _id
+        };
+        const file = await this.DirectoryService.getDirectory(query);
+        if (!file) return Promise.reject('File not found');
+        await this.FileService.deleteFile(query);
+        return true;
+    }
 }

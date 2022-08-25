@@ -47,3 +47,8 @@ export class RenameFileInput {
     @Field()
     file_id!: string;
 }
+@InputType()
+export class DeleteFileInput {
+    @Field()
+    file_id!: string;
+}
