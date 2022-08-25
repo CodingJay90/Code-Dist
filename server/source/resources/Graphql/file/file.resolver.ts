@@ -28,6 +28,7 @@ import {
     DeleteFileInput,
     File,
     GetFileInput,
+    MoveFileInput,
     RenameFileInput,
 } from '@/graphql/file/file.schema';
 import { IFile } from '@/graphql/file/file.interface';
@@ -94,9 +95,30 @@ export class FileResolver {
         const query = {
             $or: [{ file_id: input.file_id }, { _id: id }], //query by directory_id or _id
         };
-        const file = await this.DirectoryService.getDirectory(query);
+        const file = await this.FileService.getFile(query);
         if (!file) return Promise.reject('File not found');
         await this.FileService.deleteFile(query);
         return true;
+    }
+
+    @Mutation(() => Boolean)
+    async moveFile(@Arg('input') input: MoveFileInput): Promise<boolean> {
+        try {
+            const { destination_path, file_id } = input;
+            const id = transFormIdToMongooseId(input.file_id);
+            const query = {
+                $or: [{ file_id: input.file_id }, { _id: id }], //query by directory_id or _id
+            };
+            const file = await this.FileService.getFile(query);
+            if (!file) return Promise.reject('File not found');
+            const newFileDir = removeTrailingSlash(destination_path);
+
+            await this.FileService.findAndUpdate(query, {
+                file_dir: `${newFileDir}/${file.file_name}`,
+            });
+            return true;
+        } catch (error) {
+            return false;
+        }
     }
 }

@@ -52,3 +52,11 @@ export class DeleteFileInput {
     @Field()
     file_id!: string;
 }
+@InputType()
+export class MoveFileInput {
+    @Field()
+    file_id!: string;
+
+    @Field()
+    destination_path!: string;
+}
