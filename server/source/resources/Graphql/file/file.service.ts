@@ -8,7 +8,12 @@ import {
 } from '@/graphql/directory/directory.interface';
 import { IFile } from '@/graphql/file/file.interface';
 import { nanoid } from 'nanoid';
-import { FilterQuery, QueryOptions } from 'mongoose';
+import {
+    DocumentDefinition,
+    FilterQuery,
+    QueryOptions,
+    UpdateQuery,
+} from 'mongoose';
 import { FileModel } from '@/graphql/file/file.model';
 class FileService {
     constructor() {}
@@ -53,91 +58,31 @@ class FileService {
         return FileModel.find(query, {}, options);
     }
 
-    getDir(filePath: string) {
-        let resolvedPath = path.resolve(filePath);
-        return resolvedPath;
+    public async getFile(
+        query: FilterQuery<IFile>,
+        options: QueryOptions = { lean: true }
+    ) {
+        return FileModel.findOne(query, {}, options);
     }
 
-    readFileContent(fileDir: string) {
-        try {
-            this.checkFileExists(fileDir);
-            const fileType = path.extname(fileDir);
-            const fileName = path.basename(fileDir);
-            if (!fileType)
-                throw new ErrorResponse('NO file in current Directory', 200);
-            let buffer = fs.readFileSync(fileDir);
-            let strData = buffer.toString();
-            return {
-                content:
-                    fileType === '.json'
-                        ? strData
-                            ? JSON.parse(strData)
-                            : '' /* check if json file is valid and has content */
-                        : strData,
-                fileName,
-                fileType,
-            };
-        } catch (error) {
-            throw error;
-        }
+    public async createFile(
+        input: DocumentDefinition<
+            Pick<IFile, 'file_name' | 'file_dir' | 'file_type'>
+        >
+    ) {
+        return FileModel.create(input);
     }
 
-    readAllDir(dir: string) {
-        let filenames = fs
-            .readdirSync(dir, { withFileTypes: true })
-            .filter((i) => !i.isDirectory());
-        return filenames;
+    public async findAndUpdate(
+        query: FilterQuery<IFile>,
+        update: UpdateQuery<IFile>,
+        options?: QueryOptions
+    ) {
+        return FileModel.findOneAndUpdate(query, update, options);
     }
 
-    createFile(filePath: string, content: string) {
-        try {
-            const data = fs.writeFileSync(filePath, content);
-            return data;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    moveFile(from: string, to: string) {
-        const source = fs.createReadStream(from);
-        const destination = fs.createWriteStream(to);
-
-        return new Promise((resolve, reject) => {
-            source.on('end', resolve);
-            source.on('error', reject);
-            source.pipe(destination);
-        });
-    }
-
-    deleteFileFromDirectory(dir: string) {
-        try {
-            this.checkFileExists(dir);
-            // fs.rmdirSync(dir, { recursive: true });
-            fs.unlinkSync(dir);
-            return true;
-        } catch (error) {
-            throw error;
-        } finally {
-        }
-    }
-
-    renameFile(oldFileName: string, newFileName: string) {
-        try {
-            this.checkFileExists(oldFileName);
-            fs.renameSync(oldFileName, newFileName);
-            return true;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    checkFileExists(fileDir: string) {
-        try {
-            fs.accessSync(fileDir, fs.constants.F_OK);
-            return true;
-        } catch (error) {
-            throw new ErrorResponse("File doesn't exist", 200);
-        }
+    public async deleteFile(query: FilterQuery<IFile>) {
+        return FileModel.deleteOne(query);
     }
 }
 

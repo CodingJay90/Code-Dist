@@ -4,6 +4,9 @@ import { Field, ObjectType, InputType, InterfaceType, ID } from 'type-graphql';
 @ObjectType()
 export class File implements IFile {
     @Field((type) => ID)
+    _id!: string;
+
+    @Field((type) => ID)
     file_id!: string;
 
     @Field()
@@ -20,4 +23,32 @@ export class File implements IFile {
 
     @Field()
     isDirectory!: boolean;
+}
+
+@InputType()
+export class GetFileInput {
+    @Field()
+    id!: string;
+}
+
+@InputType()
+export class CreateFileInput {
+    @Field()
+    file_name!: string;
+
+    @Field()
+    file_dir!: string;
+}
+@InputType()
+export class RenameFileInput {
+    @Field()
+    file_name!: string;
+
+    @Field()
+    file_id!: string;
+}
+@InputType()
+export class DeleteFileInput {
+    @Field()
+    file_id!: string;
 }

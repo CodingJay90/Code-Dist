@@ -14,15 +14,21 @@ const FileSchema = new Schema(
         },
         file_dir: {
             type: String,
+            // unique: true,
             // required: true,
         },
         file_content: {
             type: String,
+            default: '',
             // required: true,
         },
         file_id: {
             type: String,
-            // required: true,
+            default: `file-${nanoid(10)}`,
+        },
+        is_directory: {
+            type: Boolean,
+            default: false,
         },
     },
     { timestamps: true }
