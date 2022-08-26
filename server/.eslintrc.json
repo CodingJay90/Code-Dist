@@ -15,6 +15,7 @@
     "project": "tsconfig.json"
   },
   "rules": {
+    "linebreak-style": 0,
     "camelcase": "off",
     "no-underscore-dangle": ["error", { "allow": ["_id", "__dirname"] }],
     "array-bracket-spacing": 2,
@@ -33,7 +34,6 @@
     "valid-typeof": 2,
     "arrow-body-style": 2,
     "no-var": 2,
-    "linebreak-style": [2, "unix"],
     "semi": [1, "always"],
     "brace-style": "off",
     "@typescript-eslint/semi": "off",
