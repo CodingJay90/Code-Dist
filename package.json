@@ -1,0 +1,27 @@
+{
+  "name": "code-dist",
+  "version": "1.0.0",
+  "description": "A text-editor app",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "husky": "^8.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky install",
+    "dev:server": "npm run dev-watch --prefix server",
+    "lint-server": "npm run lint --prefix server",
+    "create-hook": "husky add .husky/pre-commit \"npm lint-server\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CodingJay90/Code-Dist.git"
+  },
+  "author": "codingjay90",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CodingJay90/Code-Dist/issues"
+  },
+  "homepage": "https://github.com/CodingJay90/Code-Dist#readme"
+}
