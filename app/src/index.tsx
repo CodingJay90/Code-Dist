@@ -1,4 +1,7 @@
 import ReactDOM from "react-dom";
 import Entry from "./Entry";
 
-ReactDOM.render(<Entry />, document.getElementById("root"));
+import { createRoot } from "react-dom/client";
+const container = document.getElementById("root");
+const root = createRoot(container!);
+root.render(<Entry />);
