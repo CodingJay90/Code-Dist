@@ -7,11 +7,3 @@ export const Header = styled.header`
   display: flex;
   align-items: center;
 `;
-export const HeaderContainer = styled.header`
-  width: 90%;
-  margin: auto;
-`;
-export const Brand = styled.div`
-  font-size: 1.5rem;
-  cursor: pointer;
-`;

@@ -1,7 +1,14 @@
-import React from "react";
+import AppContainer from "@/components/App/AppContainer/Index";
+import AppNavbar from "@/components/AppNavbar/Index";
+import { Fragment } from "react";
 
 const App = () => {
-  return <div>App</div>;
+  return (
+    <Fragment>
+      <AppNavbar />
+      <AppContainer />
+    </Fragment>
+  );
 };
 
 export default App;
