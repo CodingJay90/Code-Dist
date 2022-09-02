@@ -6,3 +6,9 @@ export const Container = styled.header`
   min-width: 230px;
   max-width: 300px;
 `;
+
+export const FolderBlock = styled.div`
+  transition: 0.1s linear;
+  position: relative;
+  user-select: none;
+`;
