@@ -10,7 +10,7 @@ interface IProps {
 const File = ({ file }: IProps) => {
   return (
     <FileContainer nested={true}>
-      <FileWrapper>
+      <FileWrapper justify="flex-start">
         <FileIcon>
           <FcFile />
         </FileIcon>

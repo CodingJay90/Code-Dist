@@ -3,14 +3,16 @@ import SuspenseLoader from "@/components/SuspenseLoader/Index";
 import { StyledFlex } from "@/elements/Global";
 import { IDirectory } from "@/graphql/models/app.interface";
 import { useGetDirectoryTree } from "@/graphql/queries/app.queries";
-import { useCallback } from "react";
+import { Fragment, useCallback } from "react";
 import {
   Container,
   FolderArrowIcon,
   FolderBlock,
+  FolderBlockContainer,
   FolderIcon,
   FolderName,
 } from "./elements";
+import ExplorerNav from "./explorerNav";
 import File from "./File";
 import Folder from "./Folder";
 
@@ -57,7 +59,10 @@ const Explorer = () => {
         error={!!error}
         errorFallback={<h1>error</h1>}
       >
-        <>{renderDirectoryTree()}</>
+        <Fragment>
+          <ExplorerNav />
+          <FolderBlockContainer>{renderDirectoryTree()}</FolderBlockContainer>
+        </Fragment>
       </SuspenseLoader>
     </Container>
   );
