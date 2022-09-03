@@ -10,6 +10,7 @@ import {
   FolderWrapper,
   NestedFolder,
 } from "./elements";
+import TextField from "@/components/App/TextField/Index";
 
 interface IProps {
   folder: IDirectory;
@@ -20,6 +21,7 @@ interface IProps {
 const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
   const [showSubFolders, setShowSubFolders] = useState<boolean>(false);
   const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
+  const [showTextField, setShowTextField] = useState<boolean>(false);
   const [cursorPosition, setCursorPosition] = useState<{
     x: number;
     y: number;
@@ -30,7 +32,10 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
       {
         shortcut: "",
         label: "new folder",
-        onClick: () => console.log("new folder click"),
+        onClick: () => {
+          setShowTextField(true);
+          setShowSubFolders(true);
+        },
       },
       {
         shortcut: "",
@@ -81,8 +86,13 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
       <ContextMenu
         contextPosition={cursorPosition}
         showContext={showContextMenu}
-        setShowContext={() => setShowContextMenu(false)}
+        onClickOutside={() => setShowContextMenu(false)}
+        setShowContext={setShowContextMenu}
         menuItems={menuItems}
+      />
+      <TextField
+        showTextField={showTextField}
+        setShowTextField={setShowTextField}
       />
       {showSubFolders && (
         <NestedFolder className="nest">{children}</NestedFolder>

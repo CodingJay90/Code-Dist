@@ -84,8 +84,10 @@ export class DirectoryResolver {
     });
   }
 
-  @Mutation(() => String)
-  async createDirectory(@Arg('input') input: DirectoryInput): Promise<string> {
+  @Mutation(() => Directory)
+  async createDirectory(
+    @Arg('input') input: DirectoryInput
+  ): Promise<IDirectory> {
     let { directory_name, directory_path } = input;
     directory_name = removeTrailingSlash(directory_name);
     try {
@@ -93,7 +95,7 @@ export class DirectoryResolver {
         directory_name,
         directory_path: `${directory_path}${directory_name}/`,
       });
-      return newDirectory.directory_id;
+      return newDirectory;
     } catch (error) {
       return (error as any).message;
     }

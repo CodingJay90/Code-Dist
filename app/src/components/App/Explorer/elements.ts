@@ -1,5 +1,5 @@
 import Arrow from "@/components/Icons/Arrow";
-import Folder from "@/components/Icons/Folder";
+import Folder from "@/components/Icons/FolderIcon";
 import { StyledFlex } from "@/elements/Global";
 import styled from "styled-components";
 

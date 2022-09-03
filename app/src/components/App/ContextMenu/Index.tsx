@@ -2,20 +2,21 @@ import { StyledContainer } from "@/elements/Global";
 import { ContextList, ContextListItem, Wrapper } from "./elements";
 import useOnClickOutside from "@/hooks/useOnclickOutside";
 
+type MenuItem = {
+  shortcut: string;
+  label: string;
+  onClick: () => void;
+};
+
 interface IProps {
   contextPosition: {
     x: number;
     y: number;
   };
   showContext: boolean;
-  setShowContext: () => void;
-  menuItems: [
-    {
-      shortcut: string;
-      label: string;
-      onClick: () => void;
-    }[]
-  ];
+  setShowContext: React.Dispatch<React.SetStateAction<boolean>>;
+  onClickOutside: () => void;
+  menuItems: MenuItem[][];
 }
 
 const ContextMenu = ({
@@ -23,8 +24,9 @@ const ContextMenu = ({
   showContext,
   setShowContext,
   menuItems,
+  onClickOutside,
 }: IProps): JSX.Element | null => {
-  const contextRef = useOnClickOutside(setShowContext);
+  const contextRef = useOnClickOutside(onClickOutside);
   if (!showContext) return null;
   return (
     <Wrapper ref={contextRef} x={contextPosition.x} y={contextPosition.y}>
@@ -32,7 +34,12 @@ const ContextMenu = ({
         {menuItems.map((i) => (
           <ContextList>
             {i.map((item) => (
-              <ContextListItem onClick={item.onClick}>
+              <ContextListItem
+                onClick={() => {
+                  setShowContext(false);
+                  item.onClick();
+                }}
+              >
                 {item.label}
               </ContextListItem>
             ))}
