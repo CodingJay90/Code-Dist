@@ -1,11 +1,13 @@
 import { StyledFlex } from "@/elements/Global";
 import { IDirectory } from "@/graphql/models/app.interface";
+import { useState } from "react";
 import {
   FolderArrowIcon,
   FolderBlock,
   FolderIcon,
   FolderName,
   FolderWrapper,
+  NestedFolder,
 } from "./elements";
 
 interface IProps {
@@ -14,15 +16,25 @@ interface IProps {
   nested: boolean;
 }
 
-const Folder = ({ folder, children, nested }: IProps) => {
+const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
+  const [showSubFolders, setShowSubFolders] = useState<boolean>(false);
   return (
-    <FolderBlock key={folder.directory_id} nested={nested}>
-      <FolderWrapper justify="flex-start">
-        <FolderArrowIcon direction="right" />
+    <FolderBlock
+      key={folder.directory_id}
+      nested={nested}
+      className="clickToCloseNested"
+    >
+      <FolderWrapper
+        justify="flex-start"
+        onClick={() => setShowSubFolders(!showSubFolders)}
+      >
+        <FolderArrowIcon direction={showSubFolders ? "down" : "right"} />
         <FolderIcon />
         <FolderName>{folder.directory_name}</FolderName>
       </FolderWrapper>
-      {children}
+      {showSubFolders && (
+        <NestedFolder className="nest">{children}</NestedFolder>
+      )}
     </FolderBlock>
   );
 };

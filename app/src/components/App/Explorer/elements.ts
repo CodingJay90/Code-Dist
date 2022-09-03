@@ -29,6 +29,7 @@ export const FolderName = styled.div`
   margin-left: ${(props) => props.theme.spacing(8)};
   font-size: ${(props) => props.theme.spacing(12)};
 `;
+export const NestedFolder = styled.div``;
 // FILE ELEMENTS
 export const FileContainer = styled(FolderBlock)``;
 export const FileWrapper = styled(FolderWrapper)``;

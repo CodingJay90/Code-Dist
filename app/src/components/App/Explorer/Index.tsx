@@ -19,7 +19,6 @@ const Explorer = () => {
 
   function displaySubDirectory(dir: IDirectory[]) {
     const elements = dir.map((i) => {
-      console.log(i.files);
       return (
         <Folder folder={i} nested={true}>
           <>
