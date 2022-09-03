@@ -1,28 +1,41 @@
 import Arrow from "@/components/Icons/Arrow";
 import FolderIcon from "@/components/Icons/FolderIcon";
 import { StyledFlex } from "@/elements/Global";
-import React, { useRef } from "react";
+import { useCreateDirectory } from "@/graphql/mutations/app.mutations";
+import React, { useState } from "react";
 import { Input, InputWrapper, Wrapper } from "./elements";
 
 interface IProps {
   showTextField: boolean;
   setShowTextField: React.Dispatch<React.SetStateAction<boolean>>;
+  directoryPath: string;
 }
 
 const TextField = ({
   showTextField,
   setShowTextField,
+  directoryPath,
 }: IProps): JSX.Element | null => {
-  if (!showTextField) return null;
+  const [newDirectoryName, setNewDirectoryName] = useState<string>("");
+  const { createDirectory, error } = useCreateDirectory({
+    directoryName: newDirectoryName,
+    directoryPath,
+  });
 
-  function onTextFieldChange(e: React.KeyboardEvent): void {
+  function onTextFieldChange(e: React.KeyboardEvent<HTMLInputElement>): void {
     if (e.key === "Escape" || e.code === "Escape") {
       setShowTextField(false);
       return;
     }
-    console.log(e.key, e.code);
+    if (e.key === "Enter" || e.code === "Enter") {
+      console.log(e.key, e.code);
+      createDirectory();
+      setShowTextField(false);
+    }
+    setNewDirectoryName(e.currentTarget.value);
   }
 
+  if (!showTextField) return null;
   return (
     <Wrapper>
       <StyledFlex justify="flex-start">
@@ -32,7 +45,7 @@ const TextField = ({
           <Input
             ref={(input: HTMLInputElement) => input?.focus()}
             onBlur={() => setShowTextField(false)}
-            onKeyDown={onTextFieldChange}
+            onKeyUp={onTextFieldChange}
           />
         </InputWrapper>
       </StyledFlex>

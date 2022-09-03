@@ -93,6 +93,7 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
       <TextField
         showTextField={showTextField}
         setShowTextField={setShowTextField}
+        directoryPath={folder.directory_path}
       />
       {showSubFolders && (
         <NestedFolder className="nest">{children}</NestedFolder>

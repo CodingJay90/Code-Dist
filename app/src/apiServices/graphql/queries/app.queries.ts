@@ -4,7 +4,7 @@ import { IDirectory } from "@/graphql/models/app.interface";
 import { DIRECTORY_TREE_FRAGMENT } from "./fragments";
 
 // TBD: move this to a rest Api in order to get around the infinite recursion prevented by Graphql
-const GET_DIRECTORY_TREE = gql`
+export const GET_DIRECTORY_TREE = gql`
   ${DIRECTORY_TREE_FRAGMENT}
   query GetDirectoryTree {
     getDirectoryTree {
@@ -68,6 +68,6 @@ export const useGetDirectoryTree = () => {
   const { data, loading, error, refetch } = useQuery<{
     getDirectoryTree: IDirectory[];
   }>(GET_DIRECTORY_TREE);
-
+  console.log("called again");
   return { data, loading, error, refetch };
 };
