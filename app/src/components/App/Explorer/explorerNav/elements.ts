@@ -8,13 +8,12 @@ export const Wrapper = styled.div`
   padding: ${(props) => props.theme.spacing(4)};
   padding-left: ${(props) => props.theme.spacing(8)};
 `;
-export const NavButtonList = styled.ul`
+export const NavButtonList = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  list-style: none;
 `;
-export const NavButtonListItem = styled.li`
+export const NavButtonListItem = styled.button`
   margin-right: ${(props) => props.theme.spacing(4)};
   cursor: pointer;
   transition: all 0.2s linear;
@@ -22,6 +21,15 @@ export const NavButtonListItem = styled.li`
   width: 20px;
   text-align: center;
   font-size: ${(props) => props.theme.spacing(16)};
+  border: none;
+  background: transparent;
+  cursor: pointer;
+`;
+export const NavButton = styled.button`
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
 `;
 export const WorkSpaceName = styled.span`
   margin-left: ${(props) => props.theme.spacing(8)};

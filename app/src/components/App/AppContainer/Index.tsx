@@ -6,7 +6,7 @@ import Editor from "@/components/App/Editor/Index";
 
 const AppContainer = () => {
   return (
-    <StyledContainer>
+    <StyledContainer onContextMenu={(e) => e.preventDefault()}>
       <Grid>
         <SideBar />
         <Explorer />

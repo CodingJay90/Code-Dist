@@ -1,7 +1,7 @@
 import Arrow from "@/components/Icons/Arrow";
 import { StyledFlex } from "@/elements/Global";
-import React from "react";
 import {
+  NavButton,
   NavButtonList,
   NavButtonListItem,
   WorkSpaceName,
@@ -23,7 +23,7 @@ const ExplorerNav = () => {
           <WorkSpaceName>Test Dev</WorkSpaceName>
         </StyledFlex>
         <NavButtonList>
-          <NavButtonListItem>
+          <NavButtonListItem onClick={() => alert("yay")}>
             <VscNewFile />
           </NavButtonListItem>
           <NavButtonListItem>
