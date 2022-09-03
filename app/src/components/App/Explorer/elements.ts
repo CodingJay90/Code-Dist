@@ -12,7 +12,6 @@ export const Container = styled.div`
 export const FolderBlockContainer = styled.div``;
 export const FolderBlock = styled.div<{ nested: boolean }>`
   transition: 0.1s linear;
-  position: relative;
   user-select: none;
   cursor: pointer;
   margin-left: ${(props) => (props.nested ? props.theme.spacing(8) : 0)};

@@ -12,7 +12,7 @@ import {
   FolderIcon,
   FolderName,
 } from "./elements";
-import ExplorerNav from "./explorerNav";
+import ExplorerNav from "./explorerNav/Index";
 import File from "./File";
 import Folder from "./Folder";
 

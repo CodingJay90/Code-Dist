@@ -15,6 +15,7 @@ import {
 } from "react-icons/vsc";
 
 const ExplorerNav = () => {
+  function handleAddFolderButtonClick() {}
   return (
     <Wrapper>
       <StyledFlex>
@@ -26,7 +27,7 @@ const ExplorerNav = () => {
           <NavButtonListItem onClick={() => alert("yay")}>
             <VscNewFile />
           </NavButtonListItem>
-          <NavButtonListItem>
+          <NavButtonListItem onClick={handleAddFolderButtonClick}>
             <VscNewFolder />
           </NavButtonListItem>
           <NavButtonListItem>
