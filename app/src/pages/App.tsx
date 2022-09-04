@@ -1,12 +1,15 @@
 import AppContainer from "@/components/App/AppContainer/Index";
 import AppNavbar from "@/components/AppNavbar/Index";
 import { Fragment } from "react";
+import InteractionContextProvider from "@/contexts/interactions/InteractionContextProvider";
 
 const App = () => {
   return (
     <Fragment>
-      <AppNavbar />
-      <AppContainer />
+      <InteractionContextProvider>
+        <AppNavbar />
+        <AppContainer />
+      </InteractionContextProvider>
     </Fragment>
   );
 };

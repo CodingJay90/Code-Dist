@@ -87,7 +87,7 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
   }
 
   return (
-    <FolderBlock key={folder.directory_id} nested={nested} id={folder._id}>
+    <FolderBlock key={folder.directory_id} nested={nested}>
       <FolderWrapper justify="flex-start" onMouseDown={onFolderClick}>
         <FolderArrowIcon direction={showSubFolders ? "down" : "right"} />
         <FolderIcon />
@@ -110,9 +110,7 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
         actionType={actionType}
         isDirectory={isDirectory}
       />
-      {showSubFolders && (
-        <NestedFolder className="nest">{children}</NestedFolder>
-      )}
+      {showSubFolders && <NestedFolder>{children}</NestedFolder>}
     </FolderBlock>
   );
 };

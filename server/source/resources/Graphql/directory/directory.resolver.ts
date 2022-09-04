@@ -120,8 +120,27 @@ export class DirectoryResolver {
     const splits = removeTrailingSlash(directory.directory_path).split('/');
     // splits.pop();
     splits[splits.length - 1] = directory_name;
+    const newDirectoryPath = `${splits.join('/')}/`;
+    const directories = await this.DirectoryService.getDirectories({});
+    // update sub_directory paths
+    directories
+      .filter((i) => i.directory_path.includes(directory.directory_path))
+      .map(async (i) => {
+        const dirPathSplits = i.directory_path.split('/');
+        const newChildDirPath = dirPathSplits
+          .slice(splits.length, dirPathSplits.length)
+          .join('/');
+        await this.DirectoryService.findAndUpdate(
+          { _id: i._id },
+          {
+            directory_path: `${newDirectoryPath}${newChildDirPath ?? ''}`,
+          }
+        );
+        return i;
+      });
+
     const updatedDirectory = await this.DirectoryService.findAndUpdate(query, {
-      directory_path: `${splits.join('/')}/`,
+      directory_path: newDirectoryPath,
       directory_name,
     });
     return updatedDirectory?.directory_path ?? '';
