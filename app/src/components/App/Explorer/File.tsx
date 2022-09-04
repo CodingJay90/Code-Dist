@@ -5,12 +5,13 @@ import { FileContainer, FileIcon, FileName, FileWrapper } from "./elements";
 import ContextMenu from "@/components/App/ContextMenu/Index";
 import { ActionType } from "@/components/App/types";
 import { useDeleteFile } from "@/graphql/mutations/app.mutations";
-
+import TextField from "@/components/App/TextField/Index";
 interface IProps {
   file: IFile;
+  directoryPath: string;
 }
 
-const File = ({ file }: IProps) => {
+const File = ({ file, directoryPath }: IProps) => {
   const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
   const [showTextField, setShowTextField] = useState<boolean>(false);
   const [actionType, setActionType] = useState<ActionType>("create");
@@ -80,6 +81,16 @@ const File = ({ file }: IProps) => {
         onClickOutside={() => setShowContextMenu(false)}
         setShowContext={setShowContextMenu}
         menuItems={menuItems}
+      />
+      <TextField
+        showTextField={showTextField}
+        setShowTextField={setShowTextField}
+        directoryPath={directoryPath}
+        directoryId=""
+        defaultValue={file.file_name}
+        actionType={actionType}
+        isDirectory={false}
+        fileId={file.file_id}
       />
     </FileContainer>
   );

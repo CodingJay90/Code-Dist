@@ -103,6 +103,7 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
         directoryId={folder._id ?? folder.directory_id}
         defaultValue={folder.directory_name}
         actionType={actionType}
+        isDirectory={true}
       />
       {showSubFolders && (
         <NestedFolder className="nest">{children}</NestedFolder>

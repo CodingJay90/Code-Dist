@@ -4,10 +4,13 @@ import { StyledFlex } from "@/elements/Global";
 import {
   useCreateDirectory,
   useRenameDirectory,
+  useRenameFile,
 } from "@/graphql/mutations/app.mutations";
 import React, { useState } from "react";
 import { Input, InputWrapper, Wrapper } from "./elements";
 import { ActionType } from "@/components/App/types";
+import FileIcon from "@/components/Icons/FileIcon";
+import { IFile } from "@/graphql/models/app.interface";
 
 interface IProps {
   showTextField: boolean;
@@ -16,6 +19,8 @@ interface IProps {
   directoryId: string;
   actionType: ActionType;
   defaultValue: string;
+  isDirectory: boolean;
+  fileId?: string;
 }
 
 const TextField = ({
@@ -25,15 +30,22 @@ const TextField = ({
   defaultValue,
   actionType,
   directoryId,
+  isDirectory,
+  fileId,
 }: IProps): JSX.Element | null => {
-  const [newDirectoryName, setNewDirectoryName] = useState<string>("");
+  const [textField, setNewDirectoryName] = useState<string>(defaultValue);
   const { createDirectory } = useCreateDirectory({
-    directoryName: newDirectoryName,
+    directoryName: textField,
     directoryPath,
   });
   const { renameDirectory } = useRenameDirectory({
     id: directoryId,
-    directoryName: newDirectoryName,
+    directoryName: textField,
+  });
+
+  const { renameFile } = useRenameFile({
+    fileName: textField,
+    id: fileId ?? "",
   });
 
   function onTextFieldChange(e: React.KeyboardEvent<HTMLInputElement>): void {
@@ -42,9 +54,11 @@ const TextField = ({
       return;
     }
     if (e.key === "Enter" || e.code === "Enter") {
-      console.log(directoryId);
-      //   createDirectory();
-      actionType === "rename" ? renameDirectory() : createDirectory();
+      if (isDirectory) {
+        actionType === "rename" ? renameDirectory() : createDirectory();
+      } else {
+        renameFile();
+      }
       setShowTextField(false);
     }
     setNewDirectoryName(e.currentTarget.value);
@@ -55,7 +69,7 @@ const TextField = ({
     <Wrapper>
       <StyledFlex justify="flex-start">
         <Arrow direction="right" />
-        <FolderIcon />
+        {isDirectory ? <FolderIcon /> : <FileIcon />}
         <InputWrapper>
           <Input
             ref={(input: HTMLInputElement) => input?.focus()}

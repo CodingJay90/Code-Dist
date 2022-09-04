@@ -28,7 +28,11 @@ const Explorer = () => {
               ? displaySubDirectory(i.sub_directory)
               : null}
             {i.files.map((file) => (
-              <File file={file} key={file._id} />
+              <File
+                directoryPath={i.directory_path}
+                file={file}
+                key={file._id}
+              />
             ))}
           </>
         </Folder>
@@ -43,8 +47,12 @@ const Explorer = () => {
         <Folder folder={i} nested={false} key={i._id}>
           <>
             {displaySubDirectory(i.sub_directory)}
-            {i.files.map((i) => (
-              <File file={i} key={i._id} />
+            {i.files.map((file) => (
+              <File
+                directoryPath={i.directory_path}
+                file={file}
+                key={file._id}
+              />
             ))}
           </>
         </Folder>
