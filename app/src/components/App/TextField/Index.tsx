@@ -12,6 +12,7 @@ import { Input, InputWrapper, Wrapper } from "./elements";
 import { ActionType } from "@/components/App/types";
 import FileIcon from "@/components/Icons/FileIcon";
 import { IFile } from "@/graphql/models/app.interface";
+import { useInteractionContext } from "@/contexts/interactions/InteractionContextProvider";
 
 interface IProps {
   showTextField: boolean;
@@ -35,6 +36,8 @@ const TextField = ({
   fileId,
 }: IProps): JSX.Element | null => {
   const [textField, setNewDirectoryName] = useState<string>(defaultValue);
+  const { explorerInteractions, setExplorerInteractionsState } =
+    useInteractionContext();
   const { createDirectory } = useCreateDirectory({
     directoryName: textField,
     directoryPath,
@@ -79,7 +82,13 @@ const TextField = ({
         <InputWrapper>
           <Input
             ref={(input: HTMLInputElement) => input?.focus()}
-            onBlur={() => setShowTextField(false)}
+            onBlur={() => {
+              // setExplorerInteractionsState({
+              //   ...explorerInteractions,
+              //   explorerNavCreateFile: false,
+              // });
+              setShowTextField(false);
+            }}
             onKeyUp={onTextFieldChange}
             defaultValue={actionType === "rename" ? defaultValue : ""}
           />

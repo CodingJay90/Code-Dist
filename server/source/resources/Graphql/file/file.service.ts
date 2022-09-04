@@ -23,22 +23,29 @@ class FileService {
   public addFilesToDirectory(
     directories: IDirectory[],
     files: IFile[]
-  ): IDirectory[] {
+  ): { directories: IDirectory[]; rootDirFiles: IFile[] } {
+    const temp: IFile[] = [];
     const mapped = directories.map((directory) => {
       files.forEach((file) => {
+        const fileSplit = file.file_dir.split('/');
         if (
-          `${file.file_dir
-            .split('/')
-            .splice(0, file.file_dir.split('/').length - 1)
-            .join('/')}/` === directory.directory_path
+          `${fileSplit.slice(0, fileSplit.length - 1).join('/')}/` ===
+          directory.directory_path
         ) {
           directory.files?.push(file);
+        }
+        fileSplit.pop();
+        if (fileSplit.join('/') === directory.directory_path.split('/')[0]) {
+          temp.push(file);
         }
       });
 
       return directory;
     });
-    return mapped;
+    const uniqueFiles = temp.filter(
+      (c: any, index: any) => temp.indexOf(c) === index
+    );
+    return { directories: mapped, rootDirFiles: uniqueFiles };
   }
 
   // MONGOOSE SERVICES

@@ -1,11 +1,12 @@
 import { IFile } from "@/graphql/models/app.interface";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FcFile } from "react-icons/fc";
 import { FileContainer, FileIcon, FileName, FileWrapper } from "./elements";
 import ContextMenu from "@/components/App/ContextMenu/Index";
 import { ActionType } from "@/components/App/types";
 import { useDeleteFile } from "@/graphql/mutations/app.mutations";
 import TextField from "@/components/App/TextField/Index";
+import { useInteractionContext } from "@/contexts/interactions/InteractionContextProvider";
 interface IProps {
   file: IFile;
   directoryPath: string;
@@ -19,8 +20,19 @@ const File = ({ file, directoryPath }: IProps) => {
     x: number;
     y: number;
   }>({ x: 0, y: 0 });
+  const { explorerInteractions, setExplorerInteractionsState } =
+    useInteractionContext();
 
   const { deleteFile } = useDeleteFile(file._id);
+
+  useEffect(() => {
+    if (
+      explorerInteractions.selectedFilePath === file.file_dir ||
+      explorerInteractions.selectedFolderPath === directoryPath
+    ) {
+      setShowTextField(explorerInteractions.explorerNavCreateFile);
+    }
+  }, [explorerInteractions.explorerNavCreateFile]);
 
   function renderTextField(actionType: ActionType): void {
     setActionType(actionType);
@@ -53,6 +65,7 @@ const File = ({ file, directoryPath }: IProps) => {
       },
     ],
   ];
+
   function onFileClick(e: React.MouseEvent<HTMLDivElement>): void {
     if (e.button === 0) {
       //left click
@@ -65,7 +78,14 @@ const File = ({ file, directoryPath }: IProps) => {
       });
       setShowContextMenu(true);
     }
+    setExplorerInteractionsState({
+      ...explorerInteractions,
+      selectedFolderPath: "",
+      selectedFilePath: file.file_dir,
+      isDirectoryState: false,
+    });
   }
+
   return (
     <FileContainer nested={true}>
       <FileWrapper justify="flex-start" onMouseDown={onFileClick}>

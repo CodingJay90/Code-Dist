@@ -1,6 +1,6 @@
 import { StyledFlex } from "@/elements/Global";
 import { IDirectory } from "@/graphql/models/app.interface";
-import { useState, useContext } from "react";
+import { useState, useEffect } from "react";
 import ContextMenu from "@/components/App/ContextMenu/Index";
 import {
   FolderArrowIcon,
@@ -22,6 +22,8 @@ interface IProps {
 }
 
 const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
+  const { explorerInteractions, setExplorerInteractionsState } =
+    useInteractionContext();
   const [showSubFolders, setShowSubFolders] = useState<boolean>(false);
   const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
   const [showTextField, setShowTextField] = useState<boolean>(false);
@@ -36,8 +38,9 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
     folder._id ?? folder.directory_id
   );
 
-  const t = useInteractionContext();
-  console.log(t);
+  useEffect(() => {
+    setShowSubFolders(false);
+  }, [explorerInteractions.collapseAllFolders]);
 
   function renderTextField(
     actionType: ActionType,
@@ -88,6 +91,12 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
       });
       setShowContextMenu(true);
     }
+    setExplorerInteractionsState({
+      ...explorerInteractions,
+      selectedFilePath: "",
+      selectedFolderPath: folder.directory_path,
+      isDirectoryState: true,
+    });
   }
 
   return (

@@ -1,5 +1,9 @@
 import { gql, useMutation } from "@apollo/client";
-import { IDirectory, IFile } from "@/graphql/models/app.interface";
+import {
+  IDirectory,
+  IDirectoryTree,
+  IFile,
+} from "@/graphql/models/app.interface";
 import { GET_DIRECTORY_TREE } from "@/graphql/queries/app.queries";
 
 const CREATE_DIRECTORY = gql`
@@ -62,8 +66,8 @@ export const useCreateDirectory = (args: {
     update(proxy, result) {
       const data = proxy.readQuery({
         query: GET_DIRECTORY_TREE,
-      }) as { getDirectoryTree: IDirectory[] };
-      let createdDirectoryData = [...data.getDirectoryTree];
+      }) as { getDirectoryTree: IDirectoryTree };
+      let createdDirectoryData = [...data.getDirectoryTree.directories];
       createdDirectoryData = [
         result.data?.createDirectory as IDirectory,
         ...createdDirectoryData,
@@ -96,8 +100,8 @@ export const useDeleteDirectory = (id: string) => {
     update(proxy, result) {
       const data = proxy.readQuery({
         query: GET_DIRECTORY_TREE,
-      }) as { getDirectoryTree: IDirectory[] };
-      let allDirectories = [...data.getDirectoryTree];
+      }) as { getDirectoryTree: IDirectoryTree };
+      let allDirectories = [...data.getDirectoryTree.directories];
 
       function recursiveFilter(items: IDirectory[]) {
         const updated = items.map((i) => {
@@ -141,8 +145,8 @@ export const useRenameDirectory = (args: {
     update(proxy, result) {
       const data = proxy.readQuery({
         query: GET_DIRECTORY_TREE,
-      }) as { getDirectoryTree: IDirectory[] };
-      let allDirectories = [...data.getDirectoryTree];
+      }) as { getDirectoryTree: IDirectoryTree };
+      let allDirectories = [...data.getDirectoryTree.directories];
 
       function recursiveFilter(items: IDirectory[]) {
         const updated = items.map((i) => {
@@ -186,8 +190,8 @@ export const useCreateFile = (args: { fileName: string; dir: string }) => {
     update(proxy) {
       const data = proxy.readQuery({
         query: GET_DIRECTORY_TREE,
-      }) as { getDirectoryTree: IDirectory[] };
-      let allDirectories = [...data.getDirectoryTree];
+      }) as { getDirectoryTree: IDirectoryTree };
+      let allDirectories = [...data.getDirectoryTree.directories];
       proxy.writeQuery({
         query: GET_DIRECTORY_TREE,
         data: {
@@ -216,8 +220,8 @@ export const useRenameFile = (args: { fileName: string; id: string }) => {
     update(proxy) {
       const data = proxy.readQuery({
         query: GET_DIRECTORY_TREE,
-      }) as { getDirectoryTree: IDirectory[] };
-      let allDirectories = [...data.getDirectoryTree];
+      }) as { getDirectoryTree: IDirectoryTree };
+      let allDirectories = [...data.getDirectoryTree.directories];
       proxy.writeQuery({
         query: GET_DIRECTORY_TREE,
         data: {
@@ -245,8 +249,8 @@ export const useDeleteFile = (id: string) => {
     update(proxy) {
       const data = proxy.readQuery({
         query: GET_DIRECTORY_TREE,
-      }) as { getDirectoryTree: IDirectory[] };
-      let allDirectories = [...data.getDirectoryTree];
+      }) as { getDirectoryTree: IDirectoryTree };
+      let allDirectories = [...data.getDirectoryTree.directories];
       proxy.writeQuery({
         query: GET_DIRECTORY_TREE,
         data: {

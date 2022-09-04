@@ -5,6 +5,7 @@ import {
   DeleteDirectoryInput,
   Directory,
   DirectoryInput,
+  DirectoryTree,
   MoveDirectoryInput,
   RenameDirectoryInput,
 } from '@/graphql/directory/directory.schema';
@@ -18,14 +19,19 @@ import { FileUpload } from 'graphql-upload';
 import { createWriteStream } from 'fs';
 import { removeTrailingSlash, transFormIdToMongooseId } from '@/utils/strings';
 import { IDirectory } from '@/graphql/directory/directory.interface';
+import { IFile } from '@/graphql/file/file.interface';
+// import { IFile } from '../file/file.interface';
 
 @Resolver(() => Directory)
 export class DirectoryResolver {
   private readonly DirectoryService = new DirectoryService();
   private readonly FileService = new FileService();
 
-  @Query(() => [Directory])
-  async getDirectoryTree(): Promise<IDirectory[]> {
+  @Query(() => DirectoryTree)
+  async getDirectoryTree(): Promise<{
+    directories: IDirectory[];
+    root_dir_files: IFile[];
+  }> {
     const directories = await this.DirectoryService.getDirectories({});
     const files = await this.FileService.getFiles({});
     const mergedFilesAndFolders = this.FileService.addFilesToDirectory(
@@ -34,14 +40,16 @@ export class DirectoryResolver {
     );
     const extractedDirectories =
       await this.DirectoryService.listDirectoriesInExtractedZip(
-        mergedFilesAndFolders
+        mergedFilesAndFolders.directories
       );
     const newArray = extractedDirectories.map((m) => [m.directory_path, m]);
     const newMap = new Map(newArray as any);
     const iterator = newMap.values();
     const unique = [...(iterator as any)]; // this will only work when using es2015 or higher (set ""downlevelIteration": true" in tsconfig.json to use when target is lower than 3s2015)
-
-    return unique;
+    return {
+      directories: unique,
+      root_dir_files: mergedFilesAndFolders.rootDirFiles,
+    };
   }
 
   @Mutation(() => Boolean)

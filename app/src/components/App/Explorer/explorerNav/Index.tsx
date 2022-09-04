@@ -13,8 +13,11 @@ import {
   VscRefresh,
   VscCollapseAll,
 } from "react-icons/vsc";
+import { useInteractionContext } from "@/contexts/interactions/InteractionContextProvider";
 
 const ExplorerNav = () => {
+  const { explorerInteractions, setExplorerInteractionsState } =
+    useInteractionContext();
   function handleAddFolderButtonClick() {}
   return (
     <Wrapper>
@@ -24,7 +27,14 @@ const ExplorerNav = () => {
           <WorkSpaceName>Test Dev</WorkSpaceName>
         </StyledFlex>
         <NavButtonList>
-          <NavButtonListItem onClick={() => alert("yay")}>
+          <NavButtonListItem
+            onClick={() =>
+              setExplorerInteractionsState({
+                ...explorerInteractions,
+                explorerNavCreateFile: true,
+              })
+            }
+          >
             <VscNewFile />
           </NavButtonListItem>
           <NavButtonListItem onClick={handleAddFolderButtonClick}>
@@ -33,7 +43,15 @@ const ExplorerNav = () => {
           <NavButtonListItem>
             <VscRefresh />
           </NavButtonListItem>
-          <NavButtonListItem>
+          <NavButtonListItem
+            onClick={() => {
+              // console.log("clicked");
+              setExplorerInteractionsState({
+                ...explorerInteractions,
+                collapseAllFolders: Math.random().toString(),
+              });
+            }}
+          >
             <VscCollapseAll />
           </NavButtonListItem>
         </NavButtonList>

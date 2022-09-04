@@ -17,7 +17,7 @@ import File from "./File";
 import Folder from "./Folder";
 
 const Explorer = () => {
-  const { data, loading, error } = useGetDirectoryTree();
+  const { data, loading, error, refetch } = useGetDirectoryTree();
 
   function displaySubDirectory(dir: IDirectory[]) {
     const elements = dir.map((i) => {
@@ -42,7 +42,7 @@ const Explorer = () => {
   }
 
   const renderDirectoryTree = () => {
-    return data?.getDirectoryTree.map((i) => {
+    return data?.getDirectoryTree.directories.map((i) => {
       return (
         <Folder folder={i} nested={false} key={i._id}>
           <>
@@ -70,6 +70,9 @@ const Explorer = () => {
         <Fragment>
           <ExplorerNav />
           <FolderBlockContainer>{renderDirectoryTree()}</FolderBlockContainer>
+          {data?.getDirectoryTree.root_dir_files.map((i) => (
+            <File directoryPath="test" file={i} key={i._id} />
+          ))}
         </Fragment>
       </SuspenseLoader>
     </Container>

@@ -9,7 +9,7 @@ export interface IFile {
 }
 
 export interface IDirectory {
-  _id?: string;
+  _id: string;
   directory_name: string;
   directory_path: string;
   directory_id: string;

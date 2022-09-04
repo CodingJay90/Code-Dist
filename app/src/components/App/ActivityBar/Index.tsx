@@ -1,8 +1,7 @@
 import { StyledContainer, StyledFlex } from "@/elements/Global";
 import React from "react";
 import { Container, IconWrapper } from "./elements";
-import { ImFilesEmpty, ImSearch } from "react-icons/im";
-import { VscFiles } from "react-icons/vsc";
+import { VscFiles, VscSearch } from "react-icons/vsc";
 
 const SideBar = () => {
   return (
@@ -12,7 +11,7 @@ const SideBar = () => {
           <VscFiles size={24} />
         </IconWrapper>
         <IconWrapper width="50%">
-          <ImSearch size={24} />
+          <VscSearch size={24} />
         </IconWrapper>
       </StyledFlex>
     </Container>

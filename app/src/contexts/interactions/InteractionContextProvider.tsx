@@ -1,24 +1,29 @@
 import { createContext, useState, FC } from "react";
 import { createCtx } from "@/contexts/createCTXHelper";
+
 interface ExplorerInteractions {
   isDirectoryState: boolean;
-  selectedFileId: string;
-  selectedFolderId: string;
+  collapseAllFolders: string;
+  selectedFilePath: string;
+  selectedFolderPath: string;
+  explorerNavCreateFile: boolean;
 }
 
+type UpdateType = React.Dispatch<React.SetStateAction<ExplorerInteractions>>;
 interface InteractionCTXInterface {
   explorerInteractions: ExplorerInteractions;
-  setExplorerInteractionsState?: React.Dispatch<
-    React.SetStateAction<ExplorerInteractions>
-  >;
+  setExplorerInteractionsState: UpdateType;
 }
 
 const defaultState: InteractionCTXInterface = {
   explorerInteractions: {
     isDirectoryState: true,
-    selectedFileId: "",
-    selectedFolderId: "",
+    collapseAllFolders: "",
+    selectedFilePath: "",
+    selectedFolderPath: "",
+    explorerNavCreateFile: false,
   },
+  setExplorerInteractionsState: () => defaultState.explorerInteractions,
 };
 
 export const [useInteractionContext, InteractionContext] =
