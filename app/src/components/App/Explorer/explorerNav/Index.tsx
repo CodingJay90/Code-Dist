@@ -37,7 +37,14 @@ const ExplorerNav = () => {
           >
             <VscNewFile />
           </NavButtonListItem>
-          <NavButtonListItem onClick={handleAddFolderButtonClick}>
+          <NavButtonListItem
+            onClick={() =>
+              setExplorerInteractionsState({
+                ...explorerInteractions,
+                explorerNavCreateDirectory: true,
+              })
+            }
+          >
             <VscNewFolder />
           </NavButtonListItem>
           <NavButtonListItem>
@@ -45,7 +52,6 @@ const ExplorerNav = () => {
           </NavButtonListItem>
           <NavButtonListItem
             onClick={() => {
-              // console.log("clicked");
               setExplorerInteractionsState({
                 ...explorerInteractions,
                 collapseAllFolders: Math.random().toString(),

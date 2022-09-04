@@ -57,9 +57,18 @@ const TextField = ({
     fileName: textField,
   });
 
+  function closeTextField(): void {
+    setShowTextField(false);
+    setExplorerInteractionsState({
+      ...explorerInteractions,
+      explorerNavCreateFile: false,
+      explorerNavCreateDirectory: false,
+    });
+  }
+
   function onTextFieldChange(e: React.KeyboardEvent<HTMLInputElement>): void {
     if (e.key === "Escape" || e.code === "Escape") {
-      setShowTextField(false);
+      closeTextField();
       return;
     }
     if (e.key === "Enter" || e.code === "Enter") {
@@ -83,11 +92,7 @@ const TextField = ({
           <Input
             ref={(input: HTMLInputElement) => input?.focus()}
             onBlur={() => {
-              // setExplorerInteractionsState({
-              //   ...explorerInteractions,
-              //   explorerNavCreateFile: false,
-              // });
-              setShowTextField(false);
+              closeTextField();
             }}
             onKeyUp={onTextFieldChange}
             defaultValue={actionType === "rename" ? defaultValue : ""}

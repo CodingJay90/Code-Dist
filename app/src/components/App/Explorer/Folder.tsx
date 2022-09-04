@@ -42,6 +42,16 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
     setShowSubFolders(false);
   }, [explorerInteractions.collapseAllFolders]);
 
+  useEffect(() => {
+    if (
+      explorerInteractions.selectedFolderPath === folder.directory_path ||
+      (explorerInteractions.selectedFolderPath === folder.directory_path &&
+        explorerInteractions.explorerNavCreateDirectory === true)
+    ) {
+      setShowTextField(explorerInteractions.explorerNavCreateDirectory);
+    }
+  }, [explorerInteractions.explorerNavCreateDirectory]);
+
   function renderTextField(
     actionType: ActionType,
     isDirectorySelected = true

@@ -28,7 +28,8 @@ const File = ({ file, directoryPath }: IProps) => {
   useEffect(() => {
     if (
       explorerInteractions.selectedFilePath === file.file_dir ||
-      explorerInteractions.selectedFolderPath === directoryPath
+      (explorerInteractions.selectedFolderPath === directoryPath &&
+        explorerInteractions.explorerNavCreateFile === true)
     ) {
       setShowTextField(explorerInteractions.explorerNavCreateFile);
     }
