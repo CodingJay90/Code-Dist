@@ -1,6 +1,6 @@
 import { StyledFlex } from "@/elements/Global";
 import { IDirectory } from "@/graphql/models/app.interface";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import ContextMenu from "@/components/App/ContextMenu/Index";
 import {
   FolderArrowIcon,
@@ -13,6 +13,7 @@ import {
 import TextField from "@/components/App/TextField/Index";
 import { useDeleteDirectory } from "@/graphql/mutations/app.mutations";
 import { ActionType } from "@/components/App/types";
+import { useInteractionContext } from "@/contexts/interactions/InteractionContextProvider";
 
 interface IProps {
   folder: IDirectory;
@@ -34,6 +35,9 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
   const { deleteDirectory } = useDeleteDirectory(
     folder._id ?? folder.directory_id
   );
+
+  const t = useInteractionContext();
+  console.log(t);
 
   function renderTextField(
     actionType: ActionType,

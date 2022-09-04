@@ -1,5 +1,5 @@
 import { createContext, useState, FC } from "react";
-
+import { createCtx } from "@/contexts/createCTXHelper";
 interface ExplorerInteractions {
   isDirectoryState: boolean;
   selectedFileId: string;
@@ -21,7 +21,8 @@ const defaultState: InteractionCTXInterface = {
   },
 };
 
-const InteractionCTX = createContext<InteractionCTXInterface>(defaultState);
+export const [useInteractionContext, InteractionContext] =
+  createCtx<InteractionCTXInterface>();
 
 const InteractionContextProvider: FC<{
   children: JSX.Element | JSX.Element[];
@@ -30,11 +31,11 @@ const InteractionContextProvider: FC<{
     useState<ExplorerInteractions>(defaultState.explorerInteractions);
 
   return (
-    <InteractionCTX.Provider
+    <InteractionContext
       value={{ explorerInteractions, setExplorerInteractionsState }}
     >
       {children}
-    </InteractionCTX.Provider>
+    </InteractionContext>
   );
 };
 
