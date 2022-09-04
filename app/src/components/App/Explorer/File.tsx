@@ -1,21 +1,86 @@
 import { IFile } from "@/graphql/models/app.interface";
-import React from "react";
+import { useState } from "react";
 import { FcFile } from "react-icons/fc";
 import { FileContainer, FileIcon, FileName, FileWrapper } from "./elements";
+import ContextMenu from "@/components/App/ContextMenu/Index";
+import { ActionType } from "@/components/App/types";
+import { useDeleteFile } from "@/graphql/mutations/app.mutations";
 
 interface IProps {
   file: IFile;
 }
 
 const File = ({ file }: IProps) => {
+  const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
+  const [showTextField, setShowTextField] = useState<boolean>(false);
+  const [actionType, setActionType] = useState<ActionType>("create");
+  const [cursorPosition, setCursorPosition] = useState<{
+    x: number;
+    y: number;
+  }>({ x: 0, y: 0 });
+
+  const { deleteFile } = useDeleteFile(file._id);
+
+  function renderTextField(actionType: ActionType): void {
+    setActionType(actionType);
+    setShowTextField(true);
+  }
+
+  const menuItems = [
+    [
+      {
+        shortcut: "",
+        label: "rename file",
+        onClick: () => renderTextField("rename"),
+      },
+      {
+        shortcut: "",
+        label: "add file to current directory",
+        onClick: () => console.log("new file click"),
+      },
+    ],
+    [
+      {
+        shortcut: "",
+        label: "delete",
+        onClick: () => deleteFile(),
+      },
+      {
+        shortcut: "",
+        label: "cut",
+        onClick: () => alert(""),
+      },
+    ],
+  ];
+  function onFileClick(e: React.MouseEvent<HTMLDivElement>): void {
+    if (e.button === 0) {
+      //left click
+      //  setShowSubFolders(!showSubFolders);
+    }
+    if (e.button === 2) {
+      setCursorPosition({
+        x: e.pageX + 10,
+        y: e.pageY + 10,
+      });
+      setShowContextMenu(true);
+    }
+  }
   return (
     <FileContainer nested={true}>
-      <FileWrapper justify="flex-start">
+      <FileWrapper justify="flex-start" onMouseDown={onFileClick}>
         <FileIcon>
           <FcFile />
         </FileIcon>
         <FileName>{file.file_name}</FileName>
       </FileWrapper>
+
+      <ContextMenu
+        contextPosition={cursorPosition}
+        showContext={showContextMenu}
+        onClickOutside={() => setShowContextMenu(false)}
+        setShowContext={setShowContextMenu}
+        menuItems={menuItems}
+      />
     </FileContainer>
   );
 };

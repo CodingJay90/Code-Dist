@@ -1,5 +1,5 @@
 import { gql, useMutation } from "@apollo/client";
-import { IDirectory } from "@/graphql/models/app.interface";
+import { IDirectory, IFile } from "@/graphql/models/app.interface";
 import { GET_DIRECTORY_TREE } from "@/graphql/queries/app.queries";
 
 const CREATE_DIRECTORY = gql`
@@ -27,6 +27,11 @@ const DELETE_DIRECTORY = gql`
 const RENAME_DIRECTORY = gql`
   mutation RenameDirectory($input: RenameDirectoryInput!) {
     renameDirectory(input: $input)
+  }
+`;
+const DELETE_FILE = gql`
+  mutation DeleteFile($input: DeleteFileInput!) {
+    deleteFile(input: $input)
   }
 `;
 
@@ -155,4 +160,33 @@ export const useRenameDirectory = (args: {
   });
 
   return { renameDirectory, data, error };
+};
+
+export const useDeleteFile = (id: string) => {
+  const [deleteFile, { error, data }] = useMutation<
+    { deleteFile: boolean },
+    { input: Pick<IFile, "file_id"> }
+  >(DELETE_FILE, {
+    variables: {
+      input: {
+        file_id: id,
+      },
+    },
+    update(proxy) {
+      const data = proxy.readQuery({
+        query: GET_DIRECTORY_TREE,
+      }) as { getDirectoryTree: IDirectory[] };
+      let allDirectories = [...data.getDirectoryTree];
+      proxy.writeQuery({
+        query: GET_DIRECTORY_TREE,
+        data: {
+          getDirectoryTree: {
+            allDirectories,
+          },
+        },
+      });
+    },
+  });
+
+  return { deleteFile, data, error };
 };

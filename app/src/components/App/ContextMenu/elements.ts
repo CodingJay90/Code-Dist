@@ -9,7 +9,7 @@ export const Wrapper = styled.div<{ y: number; x: number }>`
   left: ${(props) => props.x}px;
   z-index: 10;
   background: grey;
-  min-width: 10rem;
+  min-width: 200px;
   border-radius: 2px;
 `;
 export const ContextList = styled.ul`
@@ -24,7 +24,8 @@ export const ContextListItem = styled.li`
   font-size: 0.8rem;
   padding-left: 1rem;
   cursor: pointer;
+  text-transform: capitalize;
   &:hover {
-    background-color: $info;
+    background-color: grey;
   }
 `;
