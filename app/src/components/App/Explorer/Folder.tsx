@@ -12,6 +12,7 @@ import {
 } from "./elements";
 import TextField from "@/components/App/TextField/Index";
 import { useDeleteDirectory } from "@/graphql/mutations/app.mutations";
+import { ActionType } from "@/components/App/types";
 
 interface IProps {
   folder: IDirectory;
@@ -23,6 +24,7 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
   const [showSubFolders, setShowSubFolders] = useState<boolean>(false);
   const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
   const [showTextField, setShowTextField] = useState<boolean>(false);
+  const [actionType, setActionType] = useState<ActionType>("create");
   const [cursorPosition, setCursorPosition] = useState<{
     x: number;
     y: number;
@@ -32,15 +34,18 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
     folder._id ?? folder.directory_id
   );
 
+  function renderTextField(actionType: ActionType): void {
+    setActionType(actionType);
+    setShowTextField(true);
+    setShowSubFolders(true);
+  }
+
   const menuItems = [
     [
       {
         shortcut: "",
         label: "new folder",
-        onClick: () => {
-          setShowTextField(true);
-          setShowSubFolders(true);
-        },
+        onClick: () => renderTextField("create"),
       },
       {
         shortcut: "",
@@ -52,7 +57,7 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
       {
         shortcut: "",
         label: "rename",
-        onClick: () => console.log("rename click"),
+        onClick: () => renderTextField("rename"),
       },
       {
         shortcut: "",
@@ -77,12 +82,7 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
   }
 
   return (
-    <FolderBlock
-      key={folder.directory_id}
-      nested={nested}
-      className="clickToCloseNested"
-      id={folder._id}
-    >
+    <FolderBlock key={folder.directory_id} nested={nested} id={folder._id}>
       <FolderWrapper justify="flex-start" onMouseDown={onFolderClick}>
         <FolderArrowIcon direction={showSubFolders ? "down" : "right"} />
         <FolderIcon />
@@ -100,6 +100,9 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
         showTextField={showTextField}
         setShowTextField={setShowTextField}
         directoryPath={folder.directory_path}
+        directoryId={folder._id ?? folder.directory_id}
+        defaultValue={folder.directory_name}
+        actionType={actionType}
       />
       {showSubFolders && (
         <NestedFolder className="nest">{children}</NestedFolder>

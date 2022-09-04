@@ -117,12 +117,11 @@ export class DirectoryResolver {
         new Error('Directory with the given id not found')
       );
     }
-    const splits = directory.directory_path.split('/');
-    splits.pop();
+    const splits = removeTrailingSlash(directory.directory_path).split('/');
+    // splits.pop();
     splits[splits.length - 1] = directory_name;
-    console.log(splits.join('/'));
     const updatedDirectory = await this.DirectoryService.findAndUpdate(query, {
-      directory_path: splits.join('/'),
+      directory_path: `${splits.join('/')}/`,
       directory_name,
     });
     return updatedDirectory?.directory_path ?? '';

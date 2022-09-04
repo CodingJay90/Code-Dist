@@ -24,6 +24,11 @@ const DELETE_DIRECTORY = gql`
     deleteDirectory(input: $input)
   }
 `;
+const RENAME_DIRECTORY = gql`
+  mutation RenameDirectory($input: RenameDirectoryInput!) {
+    renameDirectory(input: $input)
+  }
+`;
 
 export const useCreateDirectory = (args: {
   directoryName: string;
@@ -62,6 +67,7 @@ export const useCreateDirectory = (args: {
 
   return { createDirectory, data, error };
 };
+
 export const useDeleteDirectory = (id: string) => {
   const [deleteDirectory, { error, data }] = useMutation<
     { deleteDirectory: boolean },
@@ -101,4 +107,52 @@ export const useDeleteDirectory = (id: string) => {
   });
 
   return { deleteDirectory, data, error };
+};
+
+export const useRenameDirectory = (args: {
+  directoryName: string;
+  id: string;
+}) => {
+  const [renameDirectory, { error, data }] = useMutation<
+    { renameDirectory: string },
+    { input: Pick<IDirectory, "_id" | "directory_name"> }
+  >(RENAME_DIRECTORY, {
+    variables: {
+      input: {
+        _id: args.id,
+        directory_name: args.directoryName,
+      },
+    },
+    update(proxy, result) {
+      const data = proxy.readQuery({
+        query: GET_DIRECTORY_TREE,
+      }) as { getDirectoryTree: IDirectory[] };
+      let allDirectories = [...data.getDirectoryTree];
+
+      function recursiveFilter(items: IDirectory[]) {
+        const updated = items.map((i) => {
+          if (i.sub_directory && i.sub_directory.length > 0)
+            recursiveFilter(i.sub_directory);
+          if (i._id === args.id) {
+            // i.directory_name = args.directoryName;
+            // i.directory_path = result.data?.renameDirectory ?? i.directory_path;
+          }
+          return i;
+        });
+        return updated;
+      }
+
+      const filteredDirectories = recursiveFilter(allDirectories);
+      proxy.writeQuery({
+        query: GET_DIRECTORY_TREE,
+        data: {
+          getDirectoryTree: {
+            filteredDirectories,
+          },
+        },
+      });
+    },
+  });
+
+  return { renameDirectory, data, error };
 };

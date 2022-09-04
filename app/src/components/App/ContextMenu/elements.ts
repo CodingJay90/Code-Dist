@@ -10,6 +10,7 @@ export const Wrapper = styled.div<{ y: number; x: number }>`
   z-index: 10;
   background: grey;
   min-width: 10rem;
+  border-radius: 2px;
 `;
 export const ContextList = styled.ul`
   list-style: none;
