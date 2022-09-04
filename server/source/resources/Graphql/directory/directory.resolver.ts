@@ -142,6 +142,18 @@ export class DirectoryResolver {
         new Error('Directory with the given id not found')
       );
     }
+    const split = removeTrailingSlash(directory.directory_path).split('/');
+    const directories = await this.DirectoryService.getDirectories({});
+    directories.map(async (i) => {
+      if (
+        removeTrailingSlash(i.directory_path)
+          .split('/')
+          .slice(0, split.length)
+          .join('/') === split.join('/')
+      ) {
+        await this.DirectoryService.deleteDirectory({ _id: i._id });
+      }
+    });
     await this.DirectoryService.deleteDirectory(query);
     return true;
   }

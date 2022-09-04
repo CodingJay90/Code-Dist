@@ -68,6 +68,5 @@ export const useGetDirectoryTree = () => {
   const { data, loading, error, refetch } = useQuery<{
     getDirectoryTree: IDirectory[];
   }>(GET_DIRECTORY_TREE);
-  console.log("called again");
   return { data, loading, error, refetch };
 };

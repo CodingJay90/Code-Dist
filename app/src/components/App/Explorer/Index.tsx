@@ -22,13 +22,13 @@ const Explorer = () => {
   function displaySubDirectory(dir: IDirectory[]) {
     const elements = dir.map((i) => {
       return (
-        <Folder folder={i} nested={true}>
+        <Folder folder={i} nested={true} key={i._id}>
           <>
             {i.sub_directory.length
               ? displaySubDirectory(i.sub_directory)
               : null}
             {i.files.map((file) => (
-              <File file={file} />
+              <File file={file} key={file._id} />
             ))}
           </>
         </Folder>
@@ -40,11 +40,11 @@ const Explorer = () => {
   const renderDirectoryTree = () => {
     return data?.getDirectoryTree.map((i) => {
       return (
-        <Folder folder={i} nested={false}>
+        <Folder folder={i} nested={false} key={i._id}>
           <>
             {displaySubDirectory(i.sub_directory)}
             {i.files.map((i) => (
-              <File file={i} />
+              <File file={i} key={i._id} />
             ))}
           </>
         </Folder>

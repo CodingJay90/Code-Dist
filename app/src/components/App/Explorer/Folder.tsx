@@ -11,6 +11,7 @@ import {
   NestedFolder,
 } from "./elements";
 import TextField from "@/components/App/TextField/Index";
+import { useDeleteDirectory } from "@/graphql/mutations/app.mutations";
 
 interface IProps {
   folder: IDirectory;
@@ -26,6 +27,10 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
     x: number;
     y: number;
   }>({ x: 0, y: 0 });
+
+  const { deleteDirectory } = useDeleteDirectory(
+    folder._id ?? folder.directory_id
+  );
 
   const menuItems = [
     [
@@ -52,7 +57,7 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
       {
         shortcut: "",
         label: "delete",
-        onClick: () => console.log("delete click"),
+        onClick: () => deleteDirectory(),
       },
     ],
   ];
@@ -76,6 +81,7 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
       key={folder.directory_id}
       nested={nested}
       className="clickToCloseNested"
+      id={folder._id}
     >
       <FolderWrapper justify="flex-start" onMouseDown={onFolderClick}>
         <FolderArrowIcon direction={showSubFolders ? "down" : "right"} />

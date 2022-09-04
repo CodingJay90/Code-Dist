@@ -31,10 +31,11 @@ const ContextMenu = ({
   return (
     <Wrapper ref={contextRef} x={contextPosition.x} y={contextPosition.y}>
       <StyledContainer width="100%">
-        {menuItems.map((i) => (
-          <ContextList>
-            {i.map((item) => (
+        {menuItems.map((i, index) => (
+          <ContextList key={index}>
+            {i.map((item, ind) => (
               <ContextListItem
+                key={ind}
                 onClick={() => {
                   setShowContext(false);
                   item.onClick();

@@ -19,6 +19,11 @@ const CREATE_DIRECTORY = gql`
     }
   }
 `;
+const DELETE_DIRECTORY = gql`
+  mutation DeleteDirectory($input: DeleteDirectoryInput!) {
+    deleteDirectory(input: $input)
+  }
+`;
 
 export const useCreateDirectory = (args: {
   directoryName: string;
@@ -56,4 +61,44 @@ export const useCreateDirectory = (args: {
   });
 
   return { createDirectory, data, error };
+};
+export const useDeleteDirectory = (id: string) => {
+  const [deleteDirectory, { error, data }] = useMutation<
+    { deleteDirectory: boolean },
+    { input: Pick<IDirectory, "_id"> }
+  >(DELETE_DIRECTORY, {
+    variables: {
+      input: {
+        _id: id,
+      },
+    },
+    update(proxy, result) {
+      const data = proxy.readQuery({
+        query: GET_DIRECTORY_TREE,
+      }) as { getDirectoryTree: IDirectory[] };
+      let allDirectories = [...data.getDirectoryTree];
+
+      function recursiveFilter(items: IDirectory[]) {
+        const updated = items.map((i) => {
+          if (i.sub_directory && i.sub_directory.length > 0)
+            recursiveFilter(i.sub_directory);
+          if (i._id === id) i = null as any; //cannot use delete while in strict mode
+          return i;
+        });
+        return updated;
+      }
+
+      const filteredDirectories = recursiveFilter(allDirectories);
+      proxy.writeQuery({
+        query: GET_DIRECTORY_TREE,
+        data: {
+          getDirectoryTree: {
+            filteredDirectories,
+          },
+        },
+      });
+    },
+  });
+
+  return { deleteDirectory, data, error };
 };
