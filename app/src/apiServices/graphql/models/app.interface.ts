@@ -17,3 +17,8 @@ export interface IDirectory {
   sub_directory: IDirectory[];
   files: IFile[];
 }
+
+export interface IDirectoryTree {
+  directories: IDirectory[];
+  root_dir_files: IFile[];
+}
