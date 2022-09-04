@@ -37,7 +37,7 @@ const File = ({ file, directoryPath }: IProps) => {
       {
         shortcut: "",
         label: "add file to current directory",
-        onClick: () => console.log("new file click"),
+        onClick: () => renderTextField("create"),
       },
     ],
     [

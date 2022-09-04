@@ -3,6 +3,7 @@ import FolderIcon from "@/components/Icons/FolderIcon";
 import { StyledFlex } from "@/elements/Global";
 import {
   useCreateDirectory,
+  useCreateFile,
   useRenameDirectory,
   useRenameFile,
 } from "@/graphql/mutations/app.mutations";
@@ -48,6 +49,11 @@ const TextField = ({
     id: fileId ?? "",
   });
 
+  const { createFile } = useCreateFile({
+    dir: directoryPath,
+    fileName: textField,
+  });
+
   function onTextFieldChange(e: React.KeyboardEvent<HTMLInputElement>): void {
     if (e.key === "Escape" || e.code === "Escape") {
       setShowTextField(false);
@@ -57,7 +63,7 @@ const TextField = ({
       if (isDirectory) {
         actionType === "rename" ? renameDirectory() : createDirectory();
       } else {
-        renameFile();
+        actionType === "rename" ? renameFile() : createFile();
       }
       setShowTextField(false);
     }

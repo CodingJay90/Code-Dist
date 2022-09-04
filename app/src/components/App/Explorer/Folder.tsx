@@ -29,15 +29,20 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
     x: number;
     y: number;
   }>({ x: 0, y: 0 });
+  const [isDirectory, setIsDirectory] = useState<boolean>(true);
 
   const { deleteDirectory } = useDeleteDirectory(
     folder._id ?? folder.directory_id
   );
 
-  function renderTextField(actionType: ActionType): void {
+  function renderTextField(
+    actionType: ActionType,
+    isDirectorySelected = true
+  ): void {
     setActionType(actionType);
     setShowTextField(true);
     setShowSubFolders(true);
+    setIsDirectory(isDirectorySelected); //this is to trigger createFile function from textfield
   }
 
   const menuItems = [
@@ -50,7 +55,7 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
       {
         shortcut: "",
         label: "new file",
-        onClick: () => console.log("new file click"),
+        onClick: () => renderTextField("create", false),
       },
     ],
     [
@@ -103,7 +108,7 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
         directoryId={folder._id ?? folder.directory_id}
         defaultValue={folder.directory_name}
         actionType={actionType}
-        isDirectory={true}
+        isDirectory={isDirectory}
       />
       {showSubFolders && (
         <NestedFolder className="nest">{children}</NestedFolder>

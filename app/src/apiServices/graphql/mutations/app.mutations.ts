@@ -34,6 +34,11 @@ const DELETE_FILE = gql`
     deleteFile(input: $input)
   }
 `;
+const CREATE_FILE = gql`
+  mutation CreateFile($input: CreateFileInput!) {
+    createFile(input: $input)
+  }
+`;
 const RENAME_FILE = gql`
   mutation RenameFile($input: RenameFileInput!) {
     renameFile(input: $input)
@@ -165,6 +170,36 @@ export const useRenameDirectory = (args: {
   });
 
   return { renameDirectory, data, error };
+};
+
+export const useCreateFile = (args: { fileName: string; dir: string }) => {
+  const [createFile, { error, data }] = useMutation<
+    { createFile: string },
+    { input: Pick<IFile, "file_name" | "file_dir"> }
+  >(CREATE_FILE, {
+    variables: {
+      input: {
+        file_name: args.fileName,
+        file_dir: args.dir,
+      },
+    },
+    update(proxy) {
+      const data = proxy.readQuery({
+        query: GET_DIRECTORY_TREE,
+      }) as { getDirectoryTree: IDirectory[] };
+      let allDirectories = [...data.getDirectoryTree];
+      proxy.writeQuery({
+        query: GET_DIRECTORY_TREE,
+        data: {
+          getDirectoryTree: {
+            allDirectories,
+          },
+        },
+      });
+    },
+  });
+
+  return { createFile, data, error };
 };
 
 export const useRenameFile = (args: { fileName: string; id: string }) => {
