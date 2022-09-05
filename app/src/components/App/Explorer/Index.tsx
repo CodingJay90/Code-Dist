@@ -1,9 +1,10 @@
 import BackdropWithSpinner from "@/components/Loaders/BackdropWithSpinner";
 import SuspenseLoader from "@/components/SuspenseLoader/Index";
+import { useInteractionContext } from "@/contexts/interactions/InteractionContextProvider";
 import { StyledFlex } from "@/elements/Global";
 import { IDirectory } from "@/graphql/models/app.interface";
 import { useGetDirectoryTree } from "@/graphql/queries/app.queries";
-import { Fragment, useCallback } from "react";
+import { Fragment, useEffect } from "react";
 import {
   Container,
   FolderArrowIcon,
@@ -17,7 +18,33 @@ import File from "./File";
 import Folder from "./Folder";
 
 const Explorer = () => {
-  const { data, loading, error, refetch } = useGetDirectoryTree();
+  const {
+    data,
+    loading,
+    error,
+    refetch,
+    getDirectoryTree,
+    networkStatusLoading,
+  } = useGetDirectoryTree();
+
+  const { explorerInteractions, setExplorerInteractionsState } =
+    useInteractionContext();
+  const { reRenderFileTree } = explorerInteractions;
+
+  useEffect(() => {
+    getDirectoryTree();
+  }, []);
+
+  useEffect(() => {
+    if (reRenderFileTree) {
+      console.log("getting");
+      getDirectoryTree();
+      setExplorerInteractionsState({
+        ...explorerInteractions,
+        reRenderFileTree: false,
+      });
+    }
+  }, [reRenderFileTree]);
 
   function displaySubDirectory(dir: IDirectory[]) {
     const elements = dir.map((i) => {
@@ -59,10 +86,11 @@ const Explorer = () => {
       );
     });
   };
+
   return (
     <Container>
       <SuspenseLoader
-        loadingState={loading}
+        loadingState={networkStatusLoading}
         loadingFallback={<BackdropWithSpinner />}
         error={!!error}
         errorFallback={<h1>error</h1>}

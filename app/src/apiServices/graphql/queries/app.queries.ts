@@ -1,4 +1,4 @@
-import { gql, useQuery } from "@apollo/client";
+import { gql, NetworkStatus, useLazyQuery, useQuery } from "@apollo/client";
 // import { IDirectory } from "../models/app.interface";
 import { IDirectory, IFile } from "@/graphql/models/app.interface";
 import { DIRECTORY_TREE_FRAGMENT } from "./fragments";
@@ -75,8 +75,20 @@ export const GET_DIRECTORY_TREE = gql`
 `;
 
 export const useGetDirectoryTree = () => {
-  const { data, loading, error, refetch } = useQuery<{
-    getDirectoryTree: { directories: IDirectory[]; root_dir_files: IFile[] };
-  }>(GET_DIRECTORY_TREE);
-  return { data, loading, error, refetch };
+  const [getDirectoryTree, { data, loading, error, refetch, networkStatus }] =
+    useLazyQuery<{
+      getDirectoryTree: { directories: IDirectory[]; root_dir_files: IFile[] };
+    }>(GET_DIRECTORY_TREE, {
+      notifyOnNetworkStatusChange: true,
+      fetchPolicy: "cache-and-network",
+    });
+  const networkStatusLoading = networkStatus !== NetworkStatus.ready; //refetch wouldn't update loading state
+  return {
+    data,
+    loading,
+    error,
+    refetch,
+    getDirectoryTree,
+    networkStatusLoading,
+  };
 };

@@ -48,6 +48,11 @@ const RENAME_FILE = gql`
     renameFile(input: $input)
   }
 `;
+const UPLOAD_DIRECTORY = gql`
+  mutation UploadZip($file: Upload!) {
+    uploadZip(file: $file)
+  }
+`;
 
 export const useCreateDirectory = (args: {
   directoryName: string;
@@ -263,4 +268,10 @@ export const useDeleteFile = (id: string) => {
   });
 
   return { deleteFile, data, error };
+};
+
+export const useUploadDirectory = () => {
+  const [uploadDirectory, { loading, error }] = useMutation(UPLOAD_DIRECTORY);
+
+  return { loading, error, uploadDirectory };
 };

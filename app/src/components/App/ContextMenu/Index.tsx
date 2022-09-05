@@ -26,8 +26,9 @@ const ContextMenu = ({
   menuItems,
   onClickOutside,
 }: IProps): JSX.Element | null => {
+  // TBD: move conditional to be outside component
+  if (showContext === false) return null;
   const contextRef = useOnClickOutside(onClickOutside);
-  if (!showContext) return null;
   return (
     <Wrapper ref={contextRef} x={contextPosition.x} y={contextPosition.y}>
       <StyledContainer width="100%">

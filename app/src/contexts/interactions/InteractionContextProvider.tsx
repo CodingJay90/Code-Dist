@@ -7,7 +7,7 @@ interface ExplorerInteractions {
   selectedFilePath: string;
   selectedFolderPath: string;
   explorerNavCreateFile: boolean;
-  explorerNavCreateDirectory: boolean;
+  reRenderFileTree: boolean;
 }
 
 type UpdateType = React.Dispatch<React.SetStateAction<ExplorerInteractions>>;
@@ -23,7 +23,7 @@ const defaultState: InteractionCTXInterface = {
     selectedFilePath: "",
     selectedFolderPath: "",
     explorerNavCreateFile: false,
-    explorerNavCreateDirectory: false,
+    reRenderFileTree: false,
   },
   setExplorerInteractionsState: () => defaultState.explorerInteractions,
 };
