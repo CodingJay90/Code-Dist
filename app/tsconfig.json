@@ -36,7 +36,9 @@
     "paths": {
       "@/elements/*": ["./src/elements/*"],
       "@/components/*": ["./src/components/*"],
-      "@/graphql/*": ["./src/apiServices/graphql/*"]
+      "@/graphql/*": ["./src/apiServices/graphql/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/contexts/*": ["./src/contexts/*"]
     } /* Specify a set of entries that re-map imports to additional lookup locations. */,
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
     // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */

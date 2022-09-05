@@ -5,6 +5,7 @@ import {
   DeleteDirectoryInput,
   Directory,
   DirectoryInput,
+  DirectoryTree,
   MoveDirectoryInput,
   RenameDirectoryInput,
 } from '@/graphql/directory/directory.schema';
@@ -18,14 +19,19 @@ import { FileUpload } from 'graphql-upload';
 import { createWriteStream } from 'fs';
 import { removeTrailingSlash, transFormIdToMongooseId } from '@/utils/strings';
 import { IDirectory } from '@/graphql/directory/directory.interface';
+import { IFile } from '@/graphql/file/file.interface';
+// import { IFile } from '../file/file.interface';
 
 @Resolver(() => Directory)
 export class DirectoryResolver {
   private readonly DirectoryService = new DirectoryService();
   private readonly FileService = new FileService();
 
-  @Query(() => [Directory])
-  async getDirectoryTree(): Promise<IDirectory[]> {
+  @Query(() => DirectoryTree)
+  async getDirectoryTree(): Promise<{
+    directories: IDirectory[];
+    root_dir_files: IFile[];
+  }> {
     const directories = await this.DirectoryService.getDirectories({});
     const files = await this.FileService.getFiles({});
     const mergedFilesAndFolders = this.FileService.addFilesToDirectory(
@@ -34,14 +40,16 @@ export class DirectoryResolver {
     );
     const extractedDirectories =
       await this.DirectoryService.listDirectoriesInExtractedZip(
-        mergedFilesAndFolders
+        mergedFilesAndFolders.directories
       );
     const newArray = extractedDirectories.map((m) => [m.directory_path, m]);
     const newMap = new Map(newArray as any);
     const iterator = newMap.values();
     const unique = [...(iterator as any)]; // this will only work when using es2015 or higher (set ""downlevelIteration": true" in tsconfig.json to use when target is lower than 3s2015)
-
-    return unique;
+    return {
+      directories: unique,
+      root_dir_files: mergedFilesAndFolders.rootDirFiles,
+    };
   }
 
   @Mutation(() => Boolean)
@@ -65,6 +73,8 @@ export class DirectoryResolver {
           const directories = data.filter((i) => i.isDirectory);
           const files = data.filter((i) => !i.isDirectory);
           try {
+            await DirectoryModel.deleteMany({});
+            await FileModel.deleteMany({});
             await DirectoryModel.create(
               directories.map((i) =>
                 this.DirectoryService.formatDirectoryStructure(i)
@@ -84,8 +94,10 @@ export class DirectoryResolver {
     });
   }
 
-  @Mutation(() => String)
-  async createDirectory(@Arg('input') input: DirectoryInput): Promise<string> {
+  @Mutation(() => Directory)
+  async createDirectory(
+    @Arg('input') input: DirectoryInput
+  ): Promise<IDirectory> {
     let { directory_name, directory_path } = input;
     directory_name = removeTrailingSlash(directory_name);
     try {
@@ -93,7 +105,7 @@ export class DirectoryResolver {
         directory_name,
         directory_path: `${directory_path}${directory_name}/`,
       });
-      return newDirectory.directory_id;
+      return newDirectory;
     } catch (error) {
       return (error as any).message;
     }
@@ -115,12 +127,30 @@ export class DirectoryResolver {
         new Error('Directory with the given id not found')
       );
     }
-    const splits = directory.directory_path.split('/');
-    splits.pop();
+    const splits = removeTrailingSlash(directory.directory_path).split('/');
+    // splits.pop();
     splits[splits.length - 1] = directory_name;
-    console.log(splits.join('/'));
+    const newDirectoryPath = `${splits.join('/')}/`;
+    const directories = await this.DirectoryService.getDirectories({});
+    // update sub_directory paths
+    directories
+      .filter((i) => i.directory_path.includes(directory.directory_path))
+      .map(async (i) => {
+        const dirPathSplits = i.directory_path.split('/');
+        const newChildDirPath = dirPathSplits
+          .slice(splits.length, dirPathSplits.length)
+          .join('/');
+        await this.DirectoryService.findAndUpdate(
+          { _id: i._id },
+          {
+            directory_path: `${newDirectoryPath}${newChildDirPath ?? ''}`,
+          }
+        );
+        return i;
+      });
+
     const updatedDirectory = await this.DirectoryService.findAndUpdate(query, {
-      directory_path: splits.join('/'),
+      directory_path: newDirectoryPath,
       directory_name,
     });
     return updatedDirectory?.directory_path ?? '';
@@ -140,6 +170,18 @@ export class DirectoryResolver {
         new Error('Directory with the given id not found')
       );
     }
+    const split = removeTrailingSlash(directory.directory_path).split('/');
+    const directories = await this.DirectoryService.getDirectories({});
+    directories.map(async (i) => {
+      if (
+        removeTrailingSlash(i.directory_path)
+          .split('/')
+          .slice(0, split.length)
+          .join('/') === split.join('/')
+      ) {
+        await this.DirectoryService.deleteDirectory({ _id: i._id });
+      }
+    });
     await this.DirectoryService.deleteDirectory(query);
     return true;
   }

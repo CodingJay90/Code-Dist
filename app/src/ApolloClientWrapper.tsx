@@ -4,14 +4,18 @@ import {
   ApolloProvider,
   createHttpLink,
 } from "@apollo/client";
+import { createUploadLink } from "apollo-upload-client";
 
 const httpLink = createHttpLink({
   uri: "http://localhost:4000/graphql",
 });
 
 const client = new ApolloClient({
-  link: httpLink,
+  // link: httpLink,
   cache: new InMemoryCache(),
+  link: createUploadLink({
+    uri: "http://localhost:4000/graphql",
+  }),
 });
 
 const ApolloClientWrapper = ({

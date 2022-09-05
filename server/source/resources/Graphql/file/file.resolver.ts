@@ -31,13 +31,13 @@ export class FileResolver {
   @Mutation(() => String)
   async createFile(@Arg('input') input: CreateFileInput): Promise<string> {
     const { file_name, file_dir } = input;
-    const directoryToAddFile = await this.DirectoryService.getDirectory({
-      directory_path: file_dir,
-    });
+    // const directoryToAddFile = await this.DirectoryService.getDirectory({
+    //   directory_path: file_dir,
+    // });
     const formattedDir = removeTrailingSlash(file_dir);
-    if (directoryToAddFile == null) {
-      return await Promise.reject(new Error("Directory doesn't exist"));
-    }
+    // if (directoryToAddFile == null) {
+    //   return await Promise.reject(new Error("Directory doesn't exist"));
+    // }
     const fileExtension =
       file_name.split('.').length > 1 ? file_name.split('.').pop() : '';
     const createdFile = await this.FileService.createFile({
