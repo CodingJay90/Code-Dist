@@ -49,6 +49,7 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
         explorerInteractions.explorerNavCreateDirectory === true)
     ) {
       setShowTextField(explorerInteractions.explorerNavCreateDirectory);
+      setShowSubFolders(true);
     }
   }, [explorerInteractions.explorerNavCreateDirectory]);
 

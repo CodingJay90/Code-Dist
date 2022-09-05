@@ -86,7 +86,7 @@ const TextField = ({
   return (
     <Wrapper>
       <StyledFlex justify="flex-start">
-        <Arrow direction="right" />
+        {isDirectory && <Arrow direction="right" />}
         {isDirectory ? <FolderIcon /> : <FileIcon />}
         <InputWrapper>
           <Input

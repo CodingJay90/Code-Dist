@@ -7,6 +7,7 @@ interface ExplorerInteractions {
   selectedFilePath: string;
   selectedFolderPath: string;
   explorerNavCreateFile: boolean;
+  explorerNavCreateDirectory: boolean;
   reRenderFileTree: boolean;
 }
 
@@ -23,6 +24,7 @@ const defaultState: InteractionCTXInterface = {
     selectedFilePath: "",
     selectedFolderPath: "",
     explorerNavCreateFile: false,
+    explorerNavCreateDirectory: false,
     reRenderFileTree: false,
   },
   setExplorerInteractionsState: () => defaultState.explorerInteractions,

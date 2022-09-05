@@ -71,19 +71,6 @@ const MenuBar = () => {
       reRenderFileTree: true,
     });
   };
-  //   function onFileChange(e: ChangeEvent<HTMLInputElement>) {
-  //     if (!e.target?.files) return;
-  //     if (e.target.files[0].type !== "application/zip") {
-  //       alert("Only zip files are supported");
-  //       return;
-  //     }
-  //     uploadDirectory({
-  //       variables: {
-  //         file: e.target.files[0],
-  //       },
-  //     });
-  //     console.log(e.target.files);
-  //   }
 
   return (
     <MenuBarContainer>

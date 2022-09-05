@@ -18,7 +18,6 @@ import { useInteractionContext } from "@/contexts/interactions/InteractionContex
 const ExplorerNav = () => {
   const { explorerInteractions, setExplorerInteractionsState } =
     useInteractionContext();
-  function handleAddFolderButtonClick() {}
   return (
     <Wrapper>
       <StyledFlex>
