@@ -82,6 +82,7 @@ export const useGetDirectoryTree = () => {
       notifyOnNetworkStatusChange: true,
       fetchPolicy: "cache-and-network",
     });
+  // TBD make loading update without using networks status
   const networkStatusLoading = networkStatus !== NetworkStatus.ready; //refetch wouldn't update loading state
   return {
     data,

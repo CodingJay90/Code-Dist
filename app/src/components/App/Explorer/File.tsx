@@ -69,6 +69,7 @@ const File = ({ file, directoryPath }: IProps) => {
 
   function onFileClick(e: React.MouseEvent<HTMLDivElement>): void {
     if (e.button === 0) {
+      console.log(file);
       //left click
       //  setShowSubFolders(!showSubFolders);
     }
