@@ -73,6 +73,8 @@ export class DirectoryResolver {
           const directories = data.filter((i) => i.isDirectory);
           const files = data.filter((i) => !i.isDirectory);
           try {
+            await DirectoryModel.deleteMany({});
+            await FileModel.deleteMany({});
             await DirectoryModel.create(
               directories.map((i) =>
                 this.DirectoryService.formatDirectoryStructure(i)
