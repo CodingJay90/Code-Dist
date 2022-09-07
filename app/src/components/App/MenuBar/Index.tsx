@@ -1,14 +1,21 @@
 import { ChangeEvent, MouseEvent, useRef, useState } from "react";
 import ContextMenu from "@/components/App/ContextMenu/Index";
 import {
+  Brand,
+  DirName,
+  FileName,
+  InfoContainer,
   MenuBarButton,
   MenuBarButtonContainer,
   MenuBarContainer,
   MenuBarGroup,
+  Status,
   UploadInput,
+  ViewContainer,
 } from "./elements";
 import { useUploadDirectory } from "@/graphql/mutations/app.mutations";
 import { useInteractionContext } from "@/contexts/interactions/InteractionContextProvider";
+import { useAppSelector } from "@/reduxStore/hooks";
 
 const MenuBar = () => {
   const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
@@ -17,6 +24,9 @@ const MenuBar = () => {
     y: number;
   }>({ x: 0, y: 0 });
   const { uploadDirectory } = useUploadDirectory();
+  const { workspaceName, activeOpenedFile } = useAppSelector(
+    (state) => state.app
+  );
   const { explorerInteractions, setExplorerInteractionsState } =
     useInteractionContext();
 
@@ -88,6 +98,18 @@ const MenuBar = () => {
           />
         </MenuBarButtonContainer>
       </MenuBarGroup>
+
+      <InfoContainer justify="center">
+        {activeOpenedFile && (
+          <>
+            {activeOpenedFile.isModified === true && <Status />}
+            <FileName>{activeOpenedFile?.file_name} -</FileName>
+          </>
+        )}
+        <DirName>{workspaceName} -</DirName>
+        <Brand>Code dist</Brand>
+      </InfoContainer>
+      <ViewContainer></ViewContainer>
 
       <ContextMenu
         contextPosition={cursorPosition}

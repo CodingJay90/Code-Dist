@@ -14,8 +14,10 @@ import {
   VscCollapseAll,
 } from "react-icons/vsc";
 import { useInteractionContext } from "@/contexts/interactions/InteractionContextProvider";
+import { useAppSelector } from "@/reduxStore/hooks";
 
 const ExplorerNav = () => {
+  const workspaceName = useAppSelector((state) => state.app.workspaceName);
   const { explorerInteractions, setExplorerInteractionsState } =
     useInteractionContext();
   return (
@@ -23,7 +25,7 @@ const ExplorerNav = () => {
       <StyledFlex>
         <StyledFlex justify="flex-start">
           <Arrow direction="right" />
-          <WorkSpaceName>Test Dev</WorkSpaceName>
+          <WorkSpaceName>{workspaceName}</WorkSpaceName>
         </StyledFlex>
         <NavButtonList>
           <NavButtonListItem

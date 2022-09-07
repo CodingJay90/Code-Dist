@@ -6,6 +6,16 @@ const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin");
 
 const ASSET_PATH = process.env.ASSET_PATH || "/";
 const isDevelopment = process.env.NODE_ENV !== "production";
+const basicSyntaxColorizationLanguages =
+  "XML, PHP, C#, C++, Razor, Markdown, Diff, Java, VB, CoffeeScript, Handlebars, Batch, Pug, F#, Lua, Powershell, Python, Ruby, SASS, R, Objective-C"
+    .toLowerCase()
+    .replace(" ", "")
+    .split(",");
+const richIntelliSenseLanguages =
+  "TypeScript, JavaScript, CSS, LESS, SCSS, JSON, HTML"
+    .toLowerCase()
+    .replace(" ", "")
+    .split(",");
 
 module.exports = {
   entry: path.resolve(__dirname, "..", "./src/index.tsx"),
@@ -60,8 +70,103 @@ module.exports = {
       "process.env.ASSET_PATH": JSON.stringify(ASSET_PATH),
     }),
     new MonacoWebpackPlugin({
-      // available options are documented at https://github.com/Microsoft/monaco-editor-webpack-plugin#options
-      languages: ["javascript", "css", "html", "typescript", "json"],
+      languages: [
+        "abap",
+        "aes",
+        "apex",
+        "azcli",
+        "bat",
+        "bicep",
+        "c",
+        "cameligo",
+        "clojure",
+        "coffeescript",
+        "cpp",
+        "csharp",
+        "csp",
+        "css",
+        "cypher",
+        "dart",
+        "dockerfile",
+        "ecl",
+        "elixir",
+        "flow9",
+        "freemarker2",
+        "freemarker2.tag-angle.interpolation-bracket",
+        "freemarker2.tag-angle.interpolation-dollar",
+        "freemarker2.tag-auto.interpolation-bracket",
+        "freemarker2.tag-auto.interpolation-dollar",
+        "freemarker2.tag-bracket.interpolation-bracket",
+        "freemarker2.tag-bracket.interpolation-dollar",
+        "fsharp",
+        "go",
+        "graphql",
+        "handlebars",
+        "hcl",
+        "html",
+        "ini",
+        "java",
+        "javascript",
+        "json",
+        "julia",
+        "kotlin",
+        "less",
+        "lexon",
+        "liquid",
+        "lua",
+        "m3",
+        "markdown",
+        "mips",
+        "msdax",
+        "mysql",
+        "objective-c",
+        "pascal",
+        "pascaligo",
+        "perl",
+        "pgsql",
+        "php",
+        "pla",
+        "plaintext",
+        "postiats",
+        "powerquery",
+        "powershell",
+        "proto",
+        "pug",
+        "python",
+        "qsharp",
+        "r",
+        "razor",
+        "redis",
+        "redshift",
+        "restructuredtext",
+        "ruby",
+        "rust",
+        "sb",
+        "scala",
+        "scheme",
+        "scss",
+        "shell",
+        "sol",
+        "sparql",
+        "sql",
+        "st",
+        "swift",
+        "systemverilog",
+        "tcl",
+        "twig",
+        "typescript",
+        "vb",
+        "verilog",
+        "xml",
+        "yaml",
+      ],
+      // languages: ["javascript", "css", "html", "typescript", "json"],
+      // languages: richIntelliSenseLanguages.concat(
+      //   basicSyntaxColorizationLanguages
+      // ),
+      // languages: richIntelliSenseLanguages.concat(
+      //   basicSyntaxColorizationLanguages
+      // ),
     }),
   ],
   stats: "errors-only",

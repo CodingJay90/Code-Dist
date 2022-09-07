@@ -9,7 +9,7 @@ const App = () => {
     <Fragment>
       <InteractionContextProvider>
         <MenuBar />
-        <AppNavbar />
+        {/* <AppNavbar /> */}
         <AppContainer />
       </InteractionContextProvider>
     </Fragment>

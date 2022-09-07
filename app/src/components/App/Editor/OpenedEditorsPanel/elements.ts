@@ -16,6 +16,7 @@ export const Panel = styled.div`
   max-height: 3rem;
   flex-grow: 1;
   outline: 1px solid #706f6f;
+  margin-bottom: 1px;
   margin-right: 1px;
   cursor: pointer;
 `;

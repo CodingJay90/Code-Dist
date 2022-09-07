@@ -12,6 +12,7 @@
   "dependencies": {
     "@apollo/client": "^3.6.9",
     "@apollo/react-hooks": "^4.0.0",
+    "@reduxjs/toolkit": "^1.8.5",
     "apollo-link-http": "^1.5.17",
     "apollo-upload-client": "^17.0.0",
     "graphql": "^16.6.0",
@@ -20,6 +21,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.4.0",
+    "react-redux": "^8.0.2",
     "react-router-dom": "^6.3.0",
     "redux": "^4.2.0",
     "styled-components": "^5.3.5"
@@ -37,6 +39,7 @@
     "@types/styled-components": "^5.1.26",
     "babel-loader": "^8.2.5",
     "css-loader": "^6.7.1",
+    "fork-ts-checker-webpack-plugin": "^7.2.13",
     "html-webpack-plugin": "^5.5.0",
     "monaco-editor-webpack-plugin": "^7.0.1",
     "react-refresh": "^0.14.0",

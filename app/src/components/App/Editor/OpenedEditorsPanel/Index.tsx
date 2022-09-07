@@ -1,5 +1,6 @@
 import FileIcon from "@/components/Icons/FileIcon";
-import React from "react";
+import { useAppDispatch, useAppSelector } from "@/reduxStore/hooks";
+import { setActiveOpenedFile } from "@/reduxStore/app/appSlice";
 import {
   Panel,
   PanelContainer,
@@ -8,18 +9,24 @@ import {
   PanelName,
   PanelStatus,
 } from "./elements";
+import { FcFile } from "react-icons/fc";
 
 const OpenedEditorsPanel = () => {
+  const dispatch = useAppDispatch();
+  const { openedFiles } = useAppSelector((state) => state.app);
   return (
     <PanelContainer>
       <PanelContainerWrapper justify="flex-start">
-        <Panel>
-          <PanelGroup>
-            <FileIcon />
-            <PanelName>app.rb</PanelName>
-            <PanelStatus></PanelStatus>
-          </PanelGroup>
-        </Panel>
+        {openedFiles.map((i) => (
+          <Panel key={i._id} onClick={() => dispatch(setActiveOpenedFile(i))}>
+            <PanelGroup>
+              {/* <FileIcon /> */}
+              <FcFile />
+              <PanelName>{i.file_name}</PanelName>
+              <PanelStatus></PanelStatus>
+            </PanelGroup>
+          </Panel>
+        ))}
       </PanelContainerWrapper>
     </PanelContainer>
   );

@@ -1,7 +1,8 @@
 import styled from "styled-components";
 
-export const StyledContainer = styled.div`
-  min-height: 92vh;
+export const Container = styled.div`
+  height: 96vh;
+  max-height: 96vh;
   width: 100%;
 `;
 export const Grid = styled.div`
