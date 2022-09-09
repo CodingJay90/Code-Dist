@@ -44,7 +44,23 @@ export const app = createSlice({
       state.openedFiles = newState;
     },
     setActiveOpenedFile: (state, action: PayloadAction<IFileView>) => {
-      state.activeOpenedFile = action.payload;
+      state.activeOpenedFile = { ...state.activeOpenedFile, ...action.payload };
+    },
+    toggleFileModifiedStatus: (
+      state,
+      action: PayloadAction<{ fileId: string; status: boolean }>
+    ) => {
+      const fileToUpdate = state.openedFiles.find(
+        (file) => file._id === action.payload.fileId
+      );
+      if (!fileToUpdate) return;
+      fileToUpdate.isModified = action.payload.status;
+      const updatedOpenedFiles = state.openedFiles.map((file) =>
+        file._id === action.payload.fileId ? fileToUpdate : file
+      );
+      state.openedFiles = updatedOpenedFiles;
+      state.activeOpenedFile = fileToUpdate;
+      // state.activeOpenedFile = action.payload;
     },
     setWorkspaceName: (state, action: PayloadAction<string>) => {
       state.workspaceName = action.payload;
@@ -57,6 +73,7 @@ export const {
   addToOpenedFiles,
   setActiveOpenedFile,
   setWorkspaceName,
+  toggleFileModifiedStatus,
 } = app.actions;
 
 export const selectCount = (state: RootState) => state.app;

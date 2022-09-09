@@ -75,9 +75,8 @@ const File = ({ file, directoryPath }: IProps) => {
 
   function onFileClick(e: React.MouseEvent<HTMLDivElement>): void {
     if (e.button === 0) {
-      console.log(file);
-      dispatch(addToOpenedFiles(file));
       dispatch(setActiveOpenedFile(file));
+      dispatch(addToOpenedFiles(file));
       //left click
       //  setShowSubFolders(!showSubFolders);
     }

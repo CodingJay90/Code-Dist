@@ -17,13 +17,18 @@ const OpenedEditorsPanel = () => {
   return (
     <PanelContainer>
       <PanelContainerWrapper justify="flex-start">
-        {openedFiles.map((i) => (
-          <Panel key={i._id} onClick={() => dispatch(setActiveOpenedFile(i))}>
+        {openedFiles.map((file) => (
+          <Panel
+            key={file._id}
+            onClick={() => dispatch(setActiveOpenedFile(file))}
+          >
             <PanelGroup>
               {/* <FileIcon /> */}
               <FcFile />
-              <PanelName>{i.file_name}</PanelName>
-              <PanelStatus></PanelStatus>
+              <PanelName>{file.file_name}</PanelName>
+              <PanelStatus
+                visibility={file.isModified ? "visible" : "hidden"}
+              ></PanelStatus>
             </PanelGroup>
           </Panel>
         ))}
