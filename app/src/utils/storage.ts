@@ -1,7 +1,4 @@
 import { IFile } from "@/graphql/models/app.interface";
-interface IFileView extends IFile {
-  isModified?: boolean;
-}
 
 enum Keys {
   SELECTED_FILE = "selected_file",
@@ -55,28 +52,28 @@ export default class UseLocalStorage extends Storage<Keys> {
     return this.instance;
   }
 
-  public getSelectedFile(): IFileView {
+  public getSelectedFile(): IFile {
     return JSON.parse(this.get(Keys.SELECTED_FILE) || "{}");
   }
 
-  public getActiveOpenedFile(): IFileView | null {
+  public getActiveOpenedFile(): IFile | null {
     return JSON.parse(this.get(Keys.ACTIVE_OPENED_FILE) || "null");
   }
 
-  public getOpenedFiles(): IFileView[] {
+  public getOpenedFiles(): IFile[] {
     const files = JSON.parse(this.get(Keys.OPENED_FILES) || "{}");
     return Array.isArray(files) ? files : [];
   }
 
-  public setSelectedFile(file: IFileView | null) {
+  public setSelectedFile(file: IFile | null) {
     this.set(Keys.SELECTED_FILE, JSON.stringify(file || null));
   }
 
-  public setActiveOpenedFile(file: IFileView | null) {
+  public setActiveOpenedFile(file: IFile | null) {
     this.set(Keys.ACTIVE_OPENED_FILE, JSON.stringify(file || null));
   }
 
-  public setOpenedFiles(file: IFileView[]) {
+  public setOpenedFiles(file: IFile[]) {
     this.set(Keys.OPENED_FILES, JSON.stringify(file));
   }
 

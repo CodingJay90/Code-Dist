@@ -6,6 +6,7 @@ export interface IFile {
   file_content: string;
   file_id: string;
   isDirectory: boolean;
+  isModified?: boolean;
 }
 
 export interface IDirectory {
