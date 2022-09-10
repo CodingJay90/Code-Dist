@@ -5,6 +5,22 @@ import { useAppDispatch, useAppSelector } from "@/reduxStore/hooks";
 import { toggleFileModifiedStatus } from "@/reduxStore/app/appSlice";
 import { useHotkeys } from "react-hotkeys-hook";
 
+const LanguageMapper: { [key: string]: string } = {
+  js: "javascript",
+  jsx: "javascript",
+  ts: "typescript",
+  tsx: "javascript",
+  css: "css",
+  scss: "scss",
+  html: "html",
+  xhtml: "html",
+  handlebars: "html",
+  handlebar: "html",
+  hbs: "html",
+  json: "json",
+  jsonp: "jsonp",
+};
+
 const EditorView = () => {
   const [mnEditor, setMnEditor] =
     useState<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -12,6 +28,7 @@ const EditorView = () => {
   const editorRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useAppDispatch();
   const { activeOpenedFile } = useAppSelector((state) => state.app);
+
   useHotkeys(
     "ctrl+s, cmd+s",
     function () {
@@ -42,42 +59,6 @@ const EditorView = () => {
     setMnEditor(editor);
     setFileModifiedStatusOnType(editor);
   }
-
-  const LanguageMapper: { [key: string]: string } = {
-    js: "javascript",
-    jsx: "javascript",
-    ts: "typescript",
-    tsx: "javascript",
-    css: "css",
-    scss: "scss",
-    html: "html",
-    xhtml: "html",
-    handlebars: "html",
-    handlebar: "html",
-    hbs: "html",
-    json: "json",
-    jsonp: "jsonp",
-  };
-
-  function setEditorLanguage(language: string): void {
-    if (!mnEditor) return;
-    monaco.editor.setModelLanguage(mnEditor.getModel()!, language);
-  }
-
-  // const setFileModifiedStatusOnType = useCallback(() => {
-  //   if (!mnEditor) return;
-  //   console.log("running", typingState);
-  //   const disposableKeyDownEvent = mnEditor.onKeyDown((e) => {
-  //     setTypingState(true);
-  //     dispatch(
-  //       toggleFileModifiedStatus({
-  //         fileId: activeOpenedFile?._id ?? "",
-  //         status: true,
-  //       })
-  //     );
-  //     disposableKeyDownEvent.dispose();
-  //   });
-  // }, [typingState]);
 
   function setFileModifiedStatusOnType(
     editor: monaco.editor.IStandaloneCodeEditor

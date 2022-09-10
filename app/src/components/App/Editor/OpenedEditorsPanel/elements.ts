@@ -37,7 +37,7 @@ export const PanelContainerWrapper = styled(StyledFlex)`
   outline: 1px solid #706f6f;
   flex-wrap: wrap;
 `;
-export const Panel = styled.div`
+export const Panel = styled.div<{ active: boolean }>`
   user-select: none;
   min-width: 150px;
   height: 2rem;
@@ -47,6 +47,7 @@ export const Panel = styled.div`
   margin-bottom: 1px;
   margin-right: 1px;
   cursor: pointer;
+  background: ${(props) => (props.active ? "lightgrey" : "transparent")};
 
   :hover ${PanelStatus} {
     ::before {

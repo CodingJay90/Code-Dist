@@ -13,7 +13,9 @@ import { FcFile } from "react-icons/fc";
 
 const OpenedEditorsPanel = () => {
   const dispatch = useAppDispatch();
-  const { openedFiles } = useAppSelector((state) => state.app);
+  const { openedFiles, activeOpenedFile } = useAppSelector(
+    (state) => state.app
+  );
   return (
     <PanelContainer>
       <PanelContainerWrapper justify="flex-start">
@@ -21,9 +23,9 @@ const OpenedEditorsPanel = () => {
           <Panel
             key={file._id}
             onClick={() => dispatch(setActiveOpenedFile(file))}
+            active={file._id === activeOpenedFile?._id}
           >
             <PanelGroup>
-              {/* <FileIcon /> */}
               <FcFile />
               <PanelName>{file.file_name}</PanelName>
               <PanelStatus

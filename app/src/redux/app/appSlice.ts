@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "@/reduxStore/store";
 import { IDirectory, IFile } from "@/graphql/models/app.interface";
+import UseLocalStorage from "@/utils/storage";
 
 interface IFileView extends IFile {
   isModified?: boolean;
@@ -15,11 +16,13 @@ interface AppState {
   workspaceName: string;
 }
 
+const getLocalStorage = UseLocalStorage.getInstance();
+
 const initialState: AppState = {
   directoryTree: [],
-  openedFiles: [],
+  openedFiles: getLocalStorage.getOpenedFiles(),
+  activeOpenedFile: getLocalStorage.getActiveOpenedFile(),
   selectedFile: null,
-  activeOpenedFile: null,
   workspaceName: "",
 };
 
@@ -35,16 +38,24 @@ export const app = createSlice({
         (i) => i._id === action.payload._id
       );
       if (fileExist) return;
-      state.openedFiles.push(action.payload);
+      const newOpenedFilesState = [...state.openedFiles, action.payload];
+      getLocalStorage.setOpenedFiles(newOpenedFilesState);
+      state.openedFiles = newOpenedFilesState;
     },
     removeFileFromOpenedFiles: (state, action: PayloadAction<string>) => {
       const newState = state.openedFiles.filter(
         (i) => i._id === action.payload
       );
+      getLocalStorage.setOpenedFiles(newState);
       state.openedFiles = newState;
     },
     setActiveOpenedFile: (state, action: PayloadAction<IFileView>) => {
-      state.activeOpenedFile = { ...state.activeOpenedFile, ...action.payload };
+      const newActiveOpenedFileState = {
+        ...state.activeOpenedFile,
+        ...action.payload,
+      };
+      getLocalStorage.setActiveOpenedFile(newActiveOpenedFileState);
+      state.activeOpenedFile = newActiveOpenedFileState;
     },
     toggleFileModifiedStatus: (
       state,
@@ -58,9 +69,10 @@ export const app = createSlice({
       const updatedOpenedFiles = state.openedFiles.map((file) =>
         file._id === action.payload.fileId ? fileToUpdate : file
       );
+      getLocalStorage.setOpenedFiles(updatedOpenedFiles);
+      getLocalStorage.setActiveOpenedFile(fileToUpdate);
       state.openedFiles = updatedOpenedFiles;
       state.activeOpenedFile = fileToUpdate;
-      // state.activeOpenedFile = action.payload;
     },
     setWorkspaceName: (state, action: PayloadAction<string>) => {
       state.workspaceName = action.payload;
