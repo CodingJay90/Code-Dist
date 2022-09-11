@@ -7,7 +7,13 @@ type JustifyContent =
   | "space-around"
   | "flex-start"
   | "flex-end";
-type AlignContent = "center" | "baseline" | "start" | "flex-start" | "flex-end";
+type AlignContent =
+  | "center"
+  | "baseline"
+  | "start"
+  | "flex-start"
+  | "flex-end"
+  | "initial";
 
 export const StyledFlex = styled.div<{
   direction?: FlexDirection;

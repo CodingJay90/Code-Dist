@@ -92,9 +92,15 @@ export const useGetDirectoryTree = () => {
   const networkStatusLoading = networkStatus !== NetworkStatus.ready; //refetch wouldn't update loading state
   useEffect(() => {
     if (data?.getDirectoryTree) {
+      const { directories, root_dir_files } = data.getDirectoryTree;
       const workspaceName: string =
-        data.getDirectoryTree.directories[0].directory_path.split("/")[0] ?? "";
-      dispatch(updateDirectoryTree(data.getDirectoryTree.directories));
+        directories[0].directory_path.split("/")[0] ?? "";
+      dispatch(
+        updateDirectoryTree({
+          directories,
+          root_dir_files,
+        })
+      );
       dispatch(setWorkspaceName(workspaceName));
     }
   }, [data]);

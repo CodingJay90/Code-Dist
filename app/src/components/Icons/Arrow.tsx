@@ -1,5 +1,6 @@
 import React from "react";
 import { BiChevronRight } from "react-icons/bi";
+import { VscChevronRight } from "react-icons/vsc";
 import styled from "styled-components";
 
 type Direction = "up" | "right" | "down" | "left";
@@ -11,7 +12,7 @@ const RotationMapper: { [key: string]: string } = {
   left: "rotate(190deg)",
 };
 
-const StyledArrowIcon = styled(BiChevronRight)<{ direction: Direction }>`
+const StyledArrowIcon = styled(VscChevronRight)<{ direction: Direction }>`
   transition: all 0.15s linear;
   transform: ${(prop) => RotationMapper[prop.direction]};
 `;

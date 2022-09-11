@@ -3,9 +3,13 @@ import type { RootState } from "@/reduxStore/store";
 import { IDirectory, IFile } from "@/graphql/models/app.interface";
 import UseLocalStorage from "@/utils/storage";
 
-// Define a type for the slice state
+interface DirectoryTree {
+  directories: IDirectory[];
+  root_dir_files: IFile[];
+}
+
 interface AppState {
-  directoryTree: IDirectory[];
+  directoryTree: DirectoryTree;
   openedFiles: IFile[];
   selectedFile: IFile | null;
   activeOpenedFile: IFile | null;
@@ -14,7 +18,7 @@ interface AppState {
 
 const getLocalStorage = UseLocalStorage.getInstance();
 const initialState: AppState = {
-  directoryTree: [],
+  directoryTree: { directories: [], root_dir_files: [] },
   openedFiles: getLocalStorage.getOpenedFiles(),
   activeOpenedFile: getLocalStorage.getActiveOpenedFile(),
   selectedFile: null,
@@ -25,7 +29,7 @@ export const app = createSlice({
   name: "app",
   initialState,
   reducers: {
-    updateDirectoryTree: (state, action: PayloadAction<IDirectory[]>) => {
+    updateDirectoryTree: (state, action: PayloadAction<DirectoryTree>) => {
       state.directoryTree = action.payload;
     },
     addToOpenedFiles: (state, action: PayloadAction<IFile>) => {
