@@ -7,11 +7,18 @@ import { ActionType } from "@/components/App/types";
 import { useDeleteFile } from "@/graphql/mutations/app.mutations";
 import TextField from "@/components/App/TextField/Index";
 import { useInteractionContext } from "@/contexts/interactions/InteractionContextProvider";
+import { useAppDispatch } from "@/reduxStore/hooks";
+import {
+  addToOpenedFiles,
+  setActiveOpenedFile,
+} from "@/reduxStore/app/appSlice";
+import UseLocalStorage from "@/utils/storage";
 interface IProps {
   file: IFile;
   directoryPath: string;
 }
 
+const getLocalStorage = UseLocalStorage.getInstance();
 const File = ({ file, directoryPath }: IProps) => {
   const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
   const [showTextField, setShowTextField] = useState<boolean>(false);
@@ -20,6 +27,7 @@ const File = ({ file, directoryPath }: IProps) => {
     x: number;
     y: number;
   }>({ x: 0, y: 0 });
+  const dispatch = useAppDispatch();
   const { explorerInteractions, setExplorerInteractionsState } =
     useInteractionContext();
 
@@ -69,8 +77,9 @@ const File = ({ file, directoryPath }: IProps) => {
 
   function onFileClick(e: React.MouseEvent<HTMLDivElement>): void {
     if (e.button === 0) {
-      console.log(file);
       //left click
+      dispatch(setActiveOpenedFile(file));
+      dispatch(addToOpenedFiles(file));
       //  setShowSubFolders(!showSubFolders);
     }
     if (e.button === 2) {
