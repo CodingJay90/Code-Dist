@@ -16,6 +16,7 @@ import {
 import { FcFile } from "react-icons/fc";
 import { IFile } from "@/graphql/models/app.interface";
 import CloseEditedFileModal from "@/components/Modal/CloseEditedFileModal/Index";
+import { VscCircleFilled } from "react-icons/vsc";
 
 const OpenedEditorsPanel = () => {
   const [showDialogModal, setShowDialogModal] = useState<boolean>(false);
@@ -45,10 +46,9 @@ const OpenedEditorsPanel = () => {
             <PanelGroup>
               <FcFile />
               <PanelName>{file.file_name}</PanelName>
-              <PanelStatus
-                onClick={(e) => onFileClose(e, file)}
-                visibility={file.isModified ? "visible" : "hidden"}
-              ></PanelStatus>
+              <PanelStatus onClick={(e) => onFileClose(e, file)}>
+                {file.isModified && <VscCircleFilled />}
+              </PanelStatus>
             </PanelGroup>
           </Panel>
         ))}

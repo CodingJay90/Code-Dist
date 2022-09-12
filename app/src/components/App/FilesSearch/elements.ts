@@ -73,16 +73,15 @@ export const SearchInputMatchersWrapper = styled.div`
   right: 2%;
   top: 20%;
 `;
-export const SearchInputMatchers = styled.span`
+export const SearchInputMatchers = styled.span<{ active: boolean }>`
   font-size: 0.8rem;
   transition: all 0.2s linear;
   cursor: pointer;
   padding: 0.1rem;
   border-radius: 0.2rem;
   font-weight: 500;
-  &.--active {
-    background-color: #57cbff;
-  }
+  margin-left: 2px;
+  background: ${(props) => (props.active ? " #57cbff" : "transparent")};
   &:hover {
     background-color: #e2e2e2;
   }
@@ -145,6 +144,9 @@ export const Result = styled.div``;
 export const SearchResultContainer = styled(StyledContainer)`
   margin-top: 1rem;
   padding: 3px 0;
+  height: 70vh;
+  overflow-y: auto;
+  overflow-x: hidden;
 `;
 export const SearchResultWrapperGrid = styled(StyledFlex)`
   display: grid;
