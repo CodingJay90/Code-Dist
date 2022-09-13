@@ -209,23 +209,41 @@ export const Count = styled.span`
 `;
 export const ResultContainer = styled.div`
   margin: 0.5rem 0;
-  &:hover {
-    background-color: #e2e2e2;
+`;
+export const ResultButtonWrapper = styled.div`
+  position: absolute;
+  top: 0;
+  right: 5%;
+  background: #fff;
+  visibility: hidden;
+  :hover {
+    background: #e2e2e2;
   }
 `;
 export const ResultText = styled.div`
   font-size: 0.7rem;
   cursor: pointer;
   position: relative;
+
+  padding: 3px 0;
+  margin-bottom: 4px;
+  :hover {
+    background: #e2e2e2;
+    ${ResultButtonWrapper} {
+      visibility: visible;
+      background: #e2e2e2;
+    }
+  }
+`;
+export const ResultTextWrapper = styled.div`
   width: 85%;
   margin-left: auto;
-  padding: 3px 0;
 `;
-export const ResultButtonWrapper = styled.div`
-  position: absolute;
-  top: 0;
-  right: 5%;
+export const Text = styled.span`
+  white-space: nowrap;
+  overflow: hidden;
 `;
+
 export const ResultActionButton = styled.button`
   background: transparent;
   border: none;

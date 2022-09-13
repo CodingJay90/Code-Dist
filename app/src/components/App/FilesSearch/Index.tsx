@@ -39,7 +39,6 @@ import {
   Icon,
   Name,
   Count,
-  Result,
   ResultContainer,
   ResultText,
   ResultButtonWrapper,
@@ -47,6 +46,7 @@ import {
 } from "./elements";
 import { useAppSelector } from "@/reduxStore/hooks";
 import { IFile, IDirectory } from "@/graphql/models/app.interface";
+import Result from "./Result";
 
 type SearchResults = { file: IFile; lines: string[] }[];
 
@@ -178,6 +178,7 @@ const FilesSearch = () => {
       );
     console.log(matchedLines);
   }
+
   const disableNavButtonsAndReplaceButtons = searchKeyword.length < 1;
   return (
     <SearchContainer>
@@ -288,39 +289,9 @@ const FilesSearch = () => {
         </SearchInputsContainer>
       </StyledFlex>
       <SearchResultContainer width="100%">
-        {/* {searchResults.map((result) => (
-          <Result>
-            <SearchResultWrapperGrid title={result.file.file_dir}>
-              <SearchResultWrapperGridItem>
-                <StyledFlex width="fit-content">
-                  <Arrow direction="right" />
-                  <Icon>
-                    <VscFile />
-                  </Icon>
-                  <Name>{result.file.file_name}</Name>
-                </StyledFlex>
-              </SearchResultWrapperGridItem>
-              <SearchResultWrapperGridItem>
-                <Count>{result.lines.length}</Count>
-              </SearchResultWrapperGridItem>
-            </SearchResultWrapperGrid>
-            <ResultContainer>
-              {result.lines.map((line) => (
-                <ResultText>
-                  {line}
-                  <ResultButtonWrapper>
-                    <ResultActionButton>
-                      <VscClose />
-                    </ResultActionButton>
-                    <ResultActionButton>
-                      <VscReplaceAll />
-                    </ResultActionButton>
-                  </ResultButtonWrapper>
-                </ResultText>
-              ))}
-            </ResultContainer>
-          </Result>
-        ))} */}
+        {searchResults.map((result) => (
+          <Result result={result} searchQuery={searchKeyword} />
+        ))}
       </SearchResultContainer>
     </SearchContainer>
   );
