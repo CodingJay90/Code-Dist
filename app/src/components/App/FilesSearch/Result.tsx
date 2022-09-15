@@ -48,37 +48,45 @@ import {
   ResultTextWrapper,
   Text,
 } from "./elements";
+import { useAppDispatch } from "@/reduxStore/hooks";
+import {
+  addToOpenedFiles,
+  setActiveOpenedFile,
+} from "@/reduxStore/app/appSlice";
 
 interface IProps {
   result: { file: IFile; lines: string[] };
   searchQuery: string;
+  collapseAll: boolean;
+  removeFileFromSearchResults: (id: string) => void;
+  removeLineFromSearchResults: (id: string, index: number) => void;
+  updateLine: (id: string, index: number) => void;
 }
 
-const Result = ({ result, searchQuery }: IProps) => {
+const Result = ({
+  result,
+  searchQuery,
+  removeFileFromSearchResults,
+  removeLineFromSearchResults,
+  updateLine,
+  collapseAll,
+}: IProps) => {
   const [expanded, setExpanded] = useState<boolean>(false);
   const [resultsToShow, setResultsToShow] = useState<number>(10);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
+    // setExpanded(false);
     if (resultsToShow > 10 && !expanded) setResultsToShow(10); //resets the amount of elements rendered in the dom back to 10 to prevent having too much nodes sitting around in the dom
   }, [expanded]);
-
-  const resultText = (text: string) =>
-    text.replace(searchQuery, `<span>${searchQuery}</span>`);
+  useEffect(() => {
+    setExpanded(false);
+  }, [collapseAll]);
 
   const showMoreButtonVisible =
     expanded &&
     result.lines.length > 10 &&
     result.lines.length >= resultsToShow;
-
-  const t = (str: string) => {
-    str
-      .substring(0, 25)
-      .replace(
-        searchQuery,
-        (highlight) =>
-          `<span style="background-color: yellow">${highlight}</span>`
-      );
-  };
 
   return (
     <ResultWrapper onClick={() => setExpanded(!expanded)}>
@@ -93,23 +101,47 @@ const Result = ({ result, searchQuery }: IProps) => {
           </StyledFlex>
         </SearchResultWrapperGridItem>
         <SearchResultWrapperGridItem>
-          <Count>{result.lines.length}</Count>
+          <Count
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              removeFileFromSearchResults(result.file._id);
+            }}
+          >
+            {result.lines.length}
+          </Count>
         </SearchResultWrapperGridItem>
       </SearchResultWrapperGrid>
       <ResultContainer>
         {expanded &&
           result.lines.slice(0, resultsToShow).map((line, index) => (
-            <ResultText key={index}>
+            <ResultText
+              key={index}
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                dispatch(setActiveOpenedFile(result.file));
+                dispatch(addToOpenedFiles(result.file));
+              }}
+            >
               <ResultTextWrapper>
                 <Text>
                   {/* {line} */}
                   {line.length > 35 ? `${line.substring(0, 35)}...` : line}
                 </Text>
                 <ResultButtonWrapper>
-                  <ResultActionButton>
+                  <ResultActionButton
+                    onClick={(e: React.MouseEvent) => {
+                      e.stopPropagation();
+                      removeLineFromSearchResults(result.file._id, index);
+                    }}
+                  >
                     <VscClose />
                   </ResultActionButton>
-                  <ResultActionButton>
+                  <ResultActionButton
+                    onClick={(e: React.MouseEvent) => {
+                      e.stopPropagation();
+                      updateLine(result.file._id, index);
+                    }}
+                  >
                     <VscReplaceAll />
                   </ResultActionButton>
                 </ResultButtonWrapper>

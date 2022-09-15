@@ -9,6 +9,7 @@ import {
   GetFileInput,
   MoveFileInput,
   RenameFileInput,
+  UpdateFileContentInput,
 } from '@/graphql/file/file.schema';
 import { IFile } from '@/graphql/file/file.interface';
 
@@ -66,6 +67,22 @@ export class FileResolver {
       file_type: fileExtension,
       file_dir: `${newFileDir.join('/')}/${file_name}`,
     });
+    return file._id ?? '';
+  }
+
+  @Mutation(() => String)
+  async updateFileContent(
+    @Arg('input') input: UpdateFileContentInput
+  ): Promise<string> {
+    const { _id, file_content } = input;
+    const file = await this.FileService.getFile({ _id });
+    if (file == null) return await Promise.reject(new Error('File not found'));
+    await this.FileService.findAndUpdate(
+      { _id },
+      {
+        file_content,
+      }
+    );
     return file._id ?? '';
   }
 

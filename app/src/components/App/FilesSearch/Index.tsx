@@ -47,10 +47,16 @@ import {
 import { useAppSelector } from "@/reduxStore/hooks";
 import { IFile, IDirectory } from "@/graphql/models/app.interface";
 import Result from "./Result";
+import UseLocalStorage from "@/utils/storage";
 
 type SearchResults = { file: IFile; lines: string[] }[];
+const getLocalStorage = UseLocalStorage.getInstance();
 
 const FilesSearch = () => {
+  const [searchHistoryIndex, setSearchHistoryIndex] = useState<number>(-1);
+  const [searchHistory, setSearchHistory] = useState<string[]>(
+    getLocalStorage.getSearchHistory()
+  );
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [regexError, setRegexError] = useState<string>("");
   const [searchKeyword, setSearchKeyword] = useState<string>("");
@@ -60,6 +66,9 @@ const FilesSearch = () => {
   const [matchCase, setMatchCase] = useState<boolean>(false);
   const [matchWholeWord, setMatchWholeWord] = useState<boolean>(false);
   const [useRegex, setUseRegex] = useState<boolean>(false);
+  const [toggleReplace, setToggleReplace] = useState<boolean>(true);
+  const [toggleSearchDetails, setToggleSearchDetails] = useState<boolean>(true);
+  const [collapseAll, setCollapseAll] = useState<boolean>(false);
   const [searchResults, setSearchResults] = useState<SearchResults>([]);
 
   const { directoryTree } = useAppSelector((state) => state.app);
@@ -154,13 +163,30 @@ const FilesSearch = () => {
     return filesToInclude.filter((file) => file.file_content.includes(query));
   }
 
+  function updateSearchHistory(key: string): void {
+    if (["ArrowUp", "ArrowDown"].includes(key)) {
+      if (key === "ArrowUp") {
+        searchHistoryIndex === searchHistory.length - 1
+          ? setSearchHistoryIndex(0)
+          : setSearchHistoryIndex(searchHistoryIndex + 1);
+      }
+      if (key === "ArrowDown") {
+        searchHistoryIndex <= 0
+          ? setSearchHistoryIndex(0)
+          : setSearchHistoryIndex(searchHistoryIndex - 1);
+      }
+      const history = searchHistory[searchHistoryIndex] ?? "";
+      setSearchKeyword(history);
+    }
+  }
+
   function onSearchFilesKeyup(
     event: React.KeyboardEvent<HTMLInputElement>
   ): void {
     const value = event.currentTarget.value;
+    updateSearchHistory(event.key || event.code);
     setErrorMessage("");
     setRegexError("");
-    setSearchKeyword(value);
     const matchedFiles = searchFiles(value);
     const matchedLines: SearchResults = [];
     matchedFiles.forEach((file, index) => {
@@ -176,7 +202,66 @@ const FilesSearch = () => {
       setErrorMessage(
         "No results found. Review your match cases and check your keywords"
       );
-    console.log(matchedLines);
+  }
+
+  function removeFileFromSearchResults(fileId: string): void {
+    const updated = searchResults.filter((file) => file.file._id !== fileId);
+    setSearchResults(updated);
+  }
+
+  function removeLineFromSearchResults(
+    fileId: string,
+    lineIndex: number
+  ): void {
+    const updatedLines =
+      searchResults
+        .find((file) => file.file._id === fileId)
+        ?.lines.filter((i, index) => index !== lineIndex) ?? [];
+    const updatedResult = searchResults.map((result) =>
+      result.file._id === fileId ? { ...result, lines: updatedLines } : result
+    );
+    setSearchResults(updatedResult);
+  }
+
+  function updateLine(fileId: string, lineIndex: number): void {
+    const file = searchResults.find((file) => file.file._id === fileId);
+    if (!file) return;
+    const fileSplits = file.file.file_content.split("\n");
+    const updatedFileContent = fileSplits
+      .map((i) =>
+        i === file?.lines[lineIndex]
+          ? i.replace(searchKeyword, replaceInput)
+          : i
+      )
+      .join("\n");
+    const updatedFile = {
+      file: {
+        ...file.file,
+        file_content: updatedFileContent,
+      },
+      lines: file.lines.map((i, index) =>
+        index === lineIndex ? i.replace(searchKeyword, replaceInput) : i
+      ),
+    };
+    const updatedResult = searchResults.map((result) =>
+      result.file._id === fileId ? updatedFile : result
+    );
+    setSearchResults(updatedResult);
+  }
+
+  function updateAllMatches(): void {
+    const matches = JSON.parse(JSON.stringify(searchResults)) as SearchResults;
+    const updatedResult = matches.map((result) => {
+      result.file.file_content = result.file.file_content.replaceAll(
+        searchKeyword,
+        replaceInput
+      );
+      result.lines = result.lines.map((i) =>
+        i.replaceAll(searchKeyword, replaceInput)
+      );
+      return result;
+    });
+    setSearchResults(updatedResult);
   }
 
   const disableNavButtonsAndReplaceButtons = searchKeyword.length < 1;
@@ -189,13 +274,19 @@ const FilesSearch = () => {
             <SearchNavButton disabled={disableNavButtonsAndReplaceButtons}>
               <VscRefresh />
             </SearchNavButton>
-            <SearchNavButton disabled={disableNavButtonsAndReplaceButtons}>
+            <SearchNavButton
+              disabled={disableNavButtonsAndReplaceButtons}
+              onClick={() => setSearchResults([])}
+            >
               <VscClearAll />
             </SearchNavButton>
             <SearchNavButton>
               <VscNewFile />
             </SearchNavButton>
-            <SearchNavButton disabled={disableNavButtonsAndReplaceButtons}>
+            <SearchNavButton
+              disabled={disableNavButtonsAndReplaceButtons}
+              onClick={() => setCollapseAll(!collapseAll)}
+            >
               <VscCollapseAll />
             </SearchNavButton>
           </StyledFlex>
@@ -203,8 +294,11 @@ const FilesSearch = () => {
       </SearchNav>
       <StyledFlex align="initial">
         <SearchInputsArrow>
-          <Span>
-            <Arrow direction="right" />
+          <Span
+            title="Toggle replace"
+            onClick={() => setToggleReplace(!toggleReplace)}
+          >
+            <Arrow direction={toggleReplace ? "right" : "down"} />
           </Span>
         </SearchInputsArrow>
         <SearchInputsContainer>
@@ -213,6 +307,9 @@ const FilesSearch = () => {
               type="text"
               title="search"
               onKeyUp={onSearchFilesKeyup}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              onBlur={() => getLocalStorage.setSearchHistory(searchKeyword)}
+              value={searchKeyword}
               placeholder={`Search (${String.fromCharCode(
                 8593
               )} ${String.fromCharCode(8595)} for history)`}
@@ -242,47 +339,57 @@ const FilesSearch = () => {
               </SearchInputMatchers>
             </SearchInputMatchersWrapper>
           </SearchInputWrapper>
-          <SearchInputWrapper>
-            <ReplaceInput
-              type="text"
-              title="replace"
-              placeholder="Replace"
-              autoComplete="off"
-            />
-            <ReplaceButtonWrapper>
-              <ReplaceButton disabled={disableNavButtonsAndReplaceButtons}>
-                <VscReplaceAll />
-              </ReplaceButton>
-              <ReplaceButton>
-                <VscEllipsis />
-              </ReplaceButton>
-            </ReplaceButtonWrapper>
-          </SearchInputWrapper>
-          <ToggledInputsContainer>
-            <ToggledInputsWrapper>
-              <Label htmlFor="to__include">files to include</Label>
-              <ToggledInput
+          {toggleReplace && (
+            <SearchInputWrapper>
+              <ReplaceInput
                 type="text"
-                id="to__include"
-                name="to__include"
-                placeholder="eg. *.ts, src/**/include"
-                spellCheck={false}
-                onChange={(e) => setFilesToIncludeInput(e.target.value)}
+                title="replace"
+                placeholder="Replace"
+                autoComplete="off"
+                onChange={(e) => setReplaceInput(e.target.value)}
               />
-            </ToggledInputsWrapper>
+              <ReplaceButtonWrapper>
+                <ReplaceButton
+                  disabled={disableNavButtonsAndReplaceButtons}
+                  onClick={updateAllMatches}
+                >
+                  <VscReplaceAll />
+                </ReplaceButton>
+                <ReplaceButton
+                  onClick={() => setToggleSearchDetails(!toggleSearchDetails)}
+                >
+                  <VscEllipsis />
+                </ReplaceButton>
+              </ReplaceButtonWrapper>
+            </SearchInputWrapper>
+          )}
+          {toggleSearchDetails && (
+            <ToggledInputsContainer>
+              <ToggledInputsWrapper>
+                <Label htmlFor="to__include">files to include</Label>
+                <ToggledInput
+                  type="text"
+                  id="to__include"
+                  name="to__include"
+                  placeholder="eg. *.ts, src/**/include"
+                  spellCheck={false}
+                  onChange={(e) => setFilesToIncludeInput(e.target.value)}
+                />
+              </ToggledInputsWrapper>
 
-            <ToggledInputsWrapper>
-              <Label htmlFor="to__exclude">files to exclude</Label>
-              <ToggledInput
-                type="text"
-                id="to__exclude"
-                name="to__exclude"
-                placeholder="eg. *.ts, src/**/include"
-                spellCheck={false}
-                onChange={(e) => setFilesToExcludeInput(e.target.value)}
-              />
-            </ToggledInputsWrapper>
-          </ToggledInputsContainer>
+              <ToggledInputsWrapper>
+                <Label htmlFor="to__exclude">files to exclude</Label>
+                <ToggledInput
+                  type="text"
+                  id="to__exclude"
+                  name="to__exclude"
+                  placeholder="eg. *.ts, src/**/include"
+                  spellCheck={false}
+                  onChange={(e) => setFilesToExcludeInput(e.target.value)}
+                />
+              </ToggledInputsWrapper>
+            </ToggledInputsContainer>
+          )}
           <Message>
             {errorMessage} {regexError}
           </Message>
@@ -290,7 +397,15 @@ const FilesSearch = () => {
       </StyledFlex>
       <SearchResultContainer width="100%">
         {searchResults.map((result) => (
-          <Result result={result} searchQuery={searchKeyword} />
+          <Result
+            key={result.file.file_id}
+            result={result}
+            searchQuery={searchKeyword}
+            removeFileFromSearchResults={removeFileFromSearchResults}
+            removeLineFromSearchResults={removeLineFromSearchResults}
+            updateLine={updateLine}
+            collapseAll={collapseAll}
+          />
         ))}
       </SearchResultContainer>
     </SearchContainer>

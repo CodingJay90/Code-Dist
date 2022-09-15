@@ -69,6 +69,8 @@ export const SearchInput = styled.input`
   }
 `;
 export const SearchInputMatchersWrapper = styled.div`
+  display: flex;
+  align-items: center;
   position: absolute;
   right: 2%;
   top: 20%;
@@ -213,7 +215,7 @@ export const ResultContainer = styled.div`
 export const ResultButtonWrapper = styled.div`
   position: absolute;
   top: 0;
-  right: 5%;
+  right: 0;
   background: #fff;
   visibility: hidden;
   :hover {
@@ -247,5 +249,6 @@ export const Text = styled.span`
 export const ResultActionButton = styled.button`
   background: transparent;
   border: none;
-  margin-right: 4px;
+  margin-right: 8px;
+  cursor: pointer;
 `;

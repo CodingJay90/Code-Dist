@@ -4,6 +4,7 @@ enum Keys {
   SELECTED_FILE = "selected_file",
   ACTIVE_OPENED_FILE = "active_opened_file",
   OPENED_FILES = "opened_files",
+  SEARCH_HISTORY = "search_history",
 }
 
 interface IStorage {
@@ -11,7 +12,6 @@ interface IStorage {
   setItem(key: string, value: string): void;
   removeItem(key: string): void;
 }
-type StorageType = "localStorage" | "sessionStorage";
 
 export abstract class Storage<T extends string> {
   private readonly storage: IStorage;
@@ -75,6 +75,18 @@ export default class UseLocalStorage extends Storage<Keys> {
 
   public setOpenedFiles(file: IFile[]) {
     this.set(Keys.OPENED_FILES, JSON.stringify(file));
+  }
+
+  public getSearchHistory() {
+    return JSON.parse(this.get(Keys.SEARCH_HISTORY) || "[]");
+  }
+
+  public setSearchHistory(keyWords: string) {
+    let history = this.getSearchHistory();
+    if (!history) history = [];
+    if (history[history.length - 1] === keyWords) return;
+    history.push(keyWords);
+    this.set(Keys.SEARCH_HISTORY, JSON.stringify(history));
   }
 
   public clear() {

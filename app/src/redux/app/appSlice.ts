@@ -98,6 +98,4 @@ export const {
   removeFileFromOpenedFiles,
 } = app.actions;
 
-export const selectCount = (state: RootState) => state.app;
-
 export default app.reducer;
