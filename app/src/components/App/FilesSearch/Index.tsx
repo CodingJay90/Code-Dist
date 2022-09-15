@@ -250,8 +250,8 @@ const FilesSearch = () => {
     const updatedResult = searchResults.map((result) =>
       result.file._id === fileId ? updatedFile : result
     );
-    // console.log(updatedFile.file);
     dispatch(updateDirectoryTree(updatedFile.file));
+    setSearchResults(updatedResult);
     updateFileContent({
       variables: {
         input: {
@@ -260,7 +260,6 @@ const FilesSearch = () => {
         },
       },
     });
-    setSearchResults(updatedResult);
   }
 
   function updateAllMatches(): void {
@@ -275,6 +274,20 @@ const FilesSearch = () => {
       );
       return result;
     });
+    const start = performance.now();
+    updatedResult.map((result) => {
+      dispatch(updateDirectoryTree(result.file));
+      updateFileContent({
+        variables: {
+          input: {
+            _id: result.file._id,
+            file_content: result.file.file_content,
+          },
+        },
+      });
+    });
+    const end = performance.now();
+    console.log(`update took ${end - start} milliseconds.`);
     setSearchResults(updatedResult);
   }
 

@@ -83,6 +83,22 @@ export const app = createSlice({
       state.openedFiles = updatedOpenedFiles;
       state.activeOpenedFile = fileToUpdate;
     },
+    updateFile: (
+      state,
+      action: PayloadAction<{ fileToUpdate: IFile; status: boolean }>
+    ) => {
+      const fileToUpdate = JSON.parse(
+        JSON.stringify(action.payload.fileToUpdate)
+      ) as IFile;
+      fileToUpdate.isModified = action.payload.status;
+      const updatedOpenedFiles = state.openedFiles.map((file) =>
+        file._id === fileToUpdate._id ? fileToUpdate : file
+      );
+      getLocalStorage.setOpenedFiles(updatedOpenedFiles);
+      getLocalStorage.setActiveOpenedFile(fileToUpdate);
+      state.openedFiles = updatedOpenedFiles;
+      state.activeOpenedFile = fileToUpdate;
+    },
     setWorkspaceName: (state, action: PayloadAction<string>) => {
       state.workspaceName = action.payload;
     },
@@ -110,22 +126,6 @@ export const app = createSlice({
         directoryTree.directories,
         action.payload._id
       );
-
-      // console.log(recursiveUpdate(directoryTree.directories, action.payload._id));
-      // let recursive = (directories: IDirectory[]) =>
-      //   directories.map((dirs) => {
-      //     let { files, sub_directory } = dirs;
-      // dirs.files = files.map((i) => {
-      //   if (i._id === action.payload._id) i = action.payload;
-      //   return i;
-      // });
-      //     // console.log(files.find((i) => i._id === action.payload._id));
-      //     if (sub_directory && sub_directory.length > 0) {
-      //       recursive(sub_directory);
-      //     }
-      //     return dirs;
-      //   });
-      // console.log(recursive(directoryTree.directories));
     },
   },
 });
@@ -138,6 +138,7 @@ export const {
   toggleFileModifiedStatus,
   removeFileFromOpenedFiles,
   updateDirectoryTree,
+  updateFile,
 } = app.actions;
 
 export default app.reducer;
