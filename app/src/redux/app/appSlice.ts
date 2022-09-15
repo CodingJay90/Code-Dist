@@ -29,7 +29,7 @@ export const app = createSlice({
   name: "app",
   initialState,
   reducers: {
-    updateDirectoryTree: (state, action: PayloadAction<DirectoryTree>) => {
+    setDirectoryTree: (state, action: PayloadAction<DirectoryTree>) => {
       state.directoryTree = action.payload;
     },
     addToOpenedFiles: (state, action: PayloadAction<IFile>) => {
@@ -86,16 +86,58 @@ export const app = createSlice({
     setWorkspaceName: (state, action: PayloadAction<string>) => {
       state.workspaceName = action.payload;
     },
+    updateDirectoryTree: (state, action: PayloadAction<IFile>) => {
+      const directoryTree = JSON.parse(
+        JSON.stringify(current(state.directoryTree))
+      ) as DirectoryTree;
+
+      const recursiveUpdate = (
+        array: IDirectory[],
+        searchTerm: string
+      ): IDirectory[] => {
+        return array.reduce((prev: any, curr) => {
+          const subDirectory = curr.sub_directory
+            ? recursiveUpdate(curr.sub_directory, searchTerm)
+            : undefined;
+          curr.files = curr.files.map((i) => {
+            if (i._id === action.payload._id) i = action.payload;
+            return i;
+          });
+          return [...prev, { ...curr, subDirectory }];
+        }, []);
+      };
+      state.directoryTree.directories = recursiveUpdate(
+        directoryTree.directories,
+        action.payload._id
+      );
+
+      // console.log(recursiveUpdate(directoryTree.directories, action.payload._id));
+      // let recursive = (directories: IDirectory[]) =>
+      //   directories.map((dirs) => {
+      //     let { files, sub_directory } = dirs;
+      // dirs.files = files.map((i) => {
+      //   if (i._id === action.payload._id) i = action.payload;
+      //   return i;
+      // });
+      //     // console.log(files.find((i) => i._id === action.payload._id));
+      //     if (sub_directory && sub_directory.length > 0) {
+      //       recursive(sub_directory);
+      //     }
+      //     return dirs;
+      //   });
+      // console.log(recursive(directoryTree.directories));
+    },
   },
 });
 
 export const {
-  updateDirectoryTree,
+  setDirectoryTree,
   addToOpenedFiles,
   setActiveOpenedFile,
   setWorkspaceName,
   toggleFileModifiedStatus,
   removeFileFromOpenedFiles,
+  updateDirectoryTree,
 } = app.actions;
 
 export default app.reducer;

@@ -44,10 +44,12 @@ import {
   ResultButtonWrapper,
   ResultActionButton,
 } from "./elements";
-import { useAppSelector } from "@/reduxStore/hooks";
+import { useAppDispatch, useAppSelector } from "@/reduxStore/hooks";
 import { IFile, IDirectory } from "@/graphql/models/app.interface";
 import Result from "./Result";
 import UseLocalStorage from "@/utils/storage";
+import { updateDirectoryTree } from "@/reduxStore/app/appSlice";
+import { useUpdateFileContent } from "@/graphql/mutations/app.mutations";
 
 type SearchResults = { file: IFile; lines: string[] }[];
 const getLocalStorage = UseLocalStorage.getInstance();
@@ -71,7 +73,9 @@ const FilesSearch = () => {
   const [collapseAll, setCollapseAll] = useState<boolean>(false);
   const [searchResults, setSearchResults] = useState<SearchResults>([]);
 
+  const { updateFileContent } = useUpdateFileContent();
   const { directoryTree } = useAppSelector((state) => state.app);
+  const dispatch = useAppDispatch();
 
   const recursiveSearch = useMemo(() => {
     let allFiles: IFile[] = [];
@@ -246,6 +250,16 @@ const FilesSearch = () => {
     const updatedResult = searchResults.map((result) =>
       result.file._id === fileId ? updatedFile : result
     );
+    // console.log(updatedFile.file);
+    dispatch(updateDirectoryTree(updatedFile.file));
+    updateFileContent({
+      variables: {
+        input: {
+          _id: updatedFile.file._id,
+          file_content: updatedFile.file.file_content,
+        },
+      },
+    });
     setSearchResults(updatedResult);
   }
 

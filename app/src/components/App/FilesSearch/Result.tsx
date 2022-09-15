@@ -76,9 +76,9 @@ const Result = ({
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    // setExpanded(false);
     if (resultsToShow > 10 && !expanded) setResultsToShow(10); //resets the amount of elements rendered in the dom back to 10 to prevent having too much nodes sitting around in the dom
   }, [expanded]);
+
   useEffect(() => {
     setExpanded(false);
   }, [collapseAll]);
