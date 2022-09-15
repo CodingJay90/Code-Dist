@@ -8,7 +8,7 @@ import FilesSearch from "@/components/App/FilesSearch/Index";
 import { ViewContainer } from "./elements";
 
 const AppContainer = () => {
-  const [view, setView] = useState<ExplorerView>(ExplorerView.SEARCH);
+  const [view, setView] = useState<ExplorerView>(ExplorerView.EXPLORER);
 
   function renderExplorerView(): JSX.Element {
     console.log("run");

@@ -13,6 +13,7 @@ import {
   VscClose,
   VscCaseSensitive,
   VscRegex,
+  VscReplace,
 } from "react-icons/vsc";
 import {
   SearchContainer,
@@ -142,7 +143,7 @@ const Result = ({
                       updateLine(result.file._id, index);
                     }}
                   >
-                    <VscReplaceAll />
+                    <VscReplace />
                   </ResultActionButton>
                 </ResultButtonWrapper>
               </ResultTextWrapper>

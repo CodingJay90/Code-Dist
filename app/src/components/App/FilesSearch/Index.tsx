@@ -50,6 +50,8 @@ import Result from "./Result";
 import UseLocalStorage from "@/utils/storage";
 import { updateDirectoryTree } from "@/reduxStore/app/appSlice";
 import { useUpdateFileContent } from "@/graphql/mutations/app.mutations";
+import CloseEditedFileModal from "@/components/Modal/CloseEditedFileModal/Index";
+import ReplaceSearchModal from "@/components/Modal/ReplaceSearchModal/Index";
 
 type SearchResults = { file: IFile; lines: string[] }[];
 const getLocalStorage = UseLocalStorage.getInstance();
@@ -71,6 +73,7 @@ const FilesSearch = () => {
   const [toggleReplace, setToggleReplace] = useState<boolean>(true);
   const [toggleSearchDetails, setToggleSearchDetails] = useState<boolean>(true);
   const [collapseAll, setCollapseAll] = useState<boolean>(false);
+  const [showDialogModal, setShowDialogModal] = useState<boolean>(false);
   const [searchResults, setSearchResults] = useState<SearchResults>([]);
 
   const { updateFileContent } = useUpdateFileContent();
@@ -289,8 +292,17 @@ const FilesSearch = () => {
     const end = performance.now();
     console.log(`update took ${end - start} milliseconds.`);
     setSearchResults(updatedResult);
+    setShowDialogModal(false);
   }
 
+  function getSearchDetails(): string {
+    const occurrences = searchResults
+      .map((i) => i.lines.length)
+      .reduce((a, b) => a + b, 0);
+    const files = searchResults.length;
+    const replaceWithKeyword = replaceInput;
+    return `Replace ${occurrences} occurrences across ${files} files with '${replaceWithKeyword}'?`;
+  }
   const disableNavButtonsAndReplaceButtons = searchKeyword.length < 1;
   return (
     <SearchContainer>
@@ -378,7 +390,7 @@ const FilesSearch = () => {
               <ReplaceButtonWrapper>
                 <ReplaceButton
                   disabled={disableNavButtonsAndReplaceButtons}
-                  onClick={updateAllMatches}
+                  onClick={() => setShowDialogModal(true)}
                 >
                   <VscReplaceAll />
                 </ReplaceButton>
@@ -435,6 +447,13 @@ const FilesSearch = () => {
           />
         ))}
       </SearchResultContainer>
+      <ReplaceSearchModal
+        showModal={showDialogModal}
+        setShowModal={setShowDialogModal}
+        onConfirm={updateAllMatches}
+        message={getSearchDetails()}
+        subMessage=""
+      />
     </SearchContainer>
   );
 };

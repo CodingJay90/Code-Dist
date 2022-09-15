@@ -14,7 +14,8 @@ import {
   FolderIcon,
   FolderName,
 } from "./elements";
-import ExplorerNav from "./explorerNav/Index";
+import ExplorerNav from "@/components/App/Explorer/explorerNav/Index";
+import OpenedEditorsNav from "@/components/App/Explorer/explorerNav/OpenedEditorsNav";
 import File from "./File";
 import Folder from "./Folder";
 
@@ -102,6 +103,7 @@ const Explorer = () => {
         errorFallback={<h1>error</h1>}
       >
         <Fragment>
+          <OpenedEditorsNav />
           <ExplorerNav />
           <FolderBlockContainer id="trx">
             {renderDirectoryTree()}
