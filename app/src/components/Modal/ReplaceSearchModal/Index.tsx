@@ -21,22 +21,18 @@ import {
 
 interface IProps {
   showModal: boolean;
-  setShowModal: (
-    state: boolean
-  ) => void | React.Dispatch<React.SetStateAction<boolean>>;
+  setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
   message: string;
   subMessage: string;
-  onDontSaveClick: () => void;
-  onSaveClick: () => void;
+  onConfirm: () => void;
 }
 
-const CloseEditedFileModal = ({
+const ReplaceSearchModal = ({
   showModal,
   setShowModal,
   message,
   subMessage,
-  onDontSaveClick,
-  onSaveClick,
+  onConfirm,
 }: IProps) => {
   function closeModal(): void {
     setShowModal(false);
@@ -52,7 +48,9 @@ const CloseEditedFileModal = ({
         <NativeModalBackdrop onClick={closeModal} />
         <NativeModalContainer>
           <ModalHeaderContainer>
-            <ModalHeaderTitle onClick={closeModal}>Warning ⚠</ModalHeaderTitle>
+            <ModalHeaderTitle onClick={closeModal}>
+              Replace All
+            </ModalHeaderTitle>
             <ModalHeaderButton onClick={closeModal}>X</ModalHeaderButton>
           </ModalHeaderContainer>
           <ModalContentContainer>
@@ -63,10 +61,7 @@ const CloseEditedFileModal = ({
           </ModalContentContainer>
           <NativeModalFooter>
             <NativeModalFooterContainer>
-              <NativeModalButton onClick={onSaveClick}>save</NativeModalButton>
-              <NativeModalButton onClick={onDontSaveClick}>
-                Don't save
-              </NativeModalButton>
+              <NativeModalButton onClick={onConfirm}>replace</NativeModalButton>
               <NativeModalButton onClick={closeModal}>cancel</NativeModalButton>
             </NativeModalFooterContainer>
           </NativeModalFooter>
@@ -76,4 +71,4 @@ const CloseEditedFileModal = ({
   );
 };
 
-export default CloseEditedFileModal;
+export default ReplaceSearchModal;

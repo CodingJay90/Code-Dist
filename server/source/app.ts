@@ -77,7 +77,7 @@ class App {
 
     this.app.use(cors());
     this.app.use(morgan('dev'));
-    this.app.use(express.json());
+    this.app.use(express.json({ limit: '50mb' }));
     this.app.use(express.urlencoded({ extended: false }));
     this.app.use(compression());
     this.app.use(

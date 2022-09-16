@@ -17,7 +17,9 @@ interface IProps {
   closeModalOnBackdropClick: boolean;
   showBackDrop: boolean;
   showModal: boolean;
-  setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowModal: (
+    state: boolean
+  ) => void | React.Dispatch<React.SetStateAction<boolean>>;
   onModalClose?: () => void;
 }
 

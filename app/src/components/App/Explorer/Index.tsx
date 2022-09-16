@@ -1,9 +1,10 @@
 import BackdropWithSpinner from "@/components/Loaders/BackdropWithSpinner";
 import SuspenseLoader from "@/components/SuspenseLoader/Index";
 import { useInteractionContext } from "@/contexts/interactions/InteractionContextProvider";
-import { StyledFlex } from "@/elements/Global";
+import { StyledContainer, StyledFlex } from "@/elements/Global";
 import { IDirectory } from "@/graphql/models/app.interface";
 import { useGetDirectoryTree } from "@/graphql/queries/app.queries";
+import { useAppSelector } from "@/reduxStore/hooks";
 import { Fragment, useEffect } from "react";
 import {
   Container,
@@ -13,7 +14,8 @@ import {
   FolderIcon,
   FolderName,
 } from "./elements";
-import ExplorerNav from "./explorerNav/Index";
+import ExplorerNav from "@/components/App/Explorer/explorerNav/Index";
+import OpenedEditorsNav from "@/components/App/Explorer/explorerNav/OpenedEditorsNav";
 import File from "./File";
 import Folder from "./Folder";
 
@@ -30,10 +32,15 @@ const Explorer = () => {
   const { explorerInteractions, setExplorerInteractionsState } =
     useInteractionContext();
   const { reRenderFileTree } = explorerInteractions;
+  const { directoryTree } = useAppSelector((state) => state.app);
 
   useEffect(() => {
+    const directoryAlreadyLoaded =
+      Object.values(directoryTree)[0].length ||
+      Object.values(directoryTree)[1].length;
+    if (directoryAlreadyLoaded) return; //prevent calling on the query each time view is switched from explorer to something else
     getDirectoryTree();
-  }, []);
+  }, [directoryTree]);
 
   useEffect(() => {
     if (reRenderFileTree) {
@@ -69,7 +76,7 @@ const Explorer = () => {
   }
 
   const renderDirectoryTree = () => {
-    return data?.getDirectoryTree.directories.map((i) => {
+    return directoryTree.directories.map((i) => {
       return (
         <Folder folder={i} nested={false} key={i._id}>
           <>
@@ -88,7 +95,7 @@ const Explorer = () => {
   };
 
   return (
-    <Container>
+    <StyledContainer width="100%">
       <SuspenseLoader
         loadingState={networkStatusLoading}
         loadingFallback={<BackdropWithSpinner />}
@@ -96,14 +103,17 @@ const Explorer = () => {
         errorFallback={<h1>error</h1>}
       >
         <Fragment>
+          <OpenedEditorsNav />
           <ExplorerNav />
-          <FolderBlockContainer>{renderDirectoryTree()}</FolderBlockContainer>
-          {data?.getDirectoryTree.root_dir_files.map((i) => (
+          <FolderBlockContainer id="trx">
+            {renderDirectoryTree()}
+          </FolderBlockContainer>
+          {directoryTree.root_dir_files.map((i) => (
             <File directoryPath="test" file={i} key={i._id} />
           ))}
         </Fragment>
       </SuspenseLoader>
-    </Container>
+    </StyledContainer>
   );
 };
 

@@ -1,5 +1,6 @@
 import { createContext, useState, FC } from "react";
 import { createCtx } from "@/contexts/createCTXHelper";
+import { IFile } from "@/graphql/models/app.interface";
 
 interface ExplorerInteractions {
   isDirectoryState: boolean;
@@ -11,10 +12,22 @@ interface ExplorerInteractions {
   reRenderFileTree: boolean;
 }
 
-type UpdateType = React.Dispatch<React.SetStateAction<ExplorerInteractions>>;
+interface EditorInteractions {
+  fileToClose: IFile | null;
+  showCloseFileDialogModal: boolean;
+}
+
+type ExplorerInteractionsUpdateType = React.Dispatch<
+  React.SetStateAction<ExplorerInteractions>
+>;
+type EditorInteractionsUpdateType = React.Dispatch<
+  React.SetStateAction<EditorInteractions>
+>;
 interface InteractionCTXInterface {
   explorerInteractions: ExplorerInteractions;
-  setExplorerInteractionsState: UpdateType;
+  editorInteractions: EditorInteractions;
+  setExplorerInteractionsState: ExplorerInteractionsUpdateType;
+  setEditorInteractionsState: EditorInteractionsUpdateType;
 }
 
 const defaultState: InteractionCTXInterface = {
@@ -27,7 +40,12 @@ const defaultState: InteractionCTXInterface = {
     explorerNavCreateDirectory: false,
     reRenderFileTree: false,
   },
+  editorInteractions: {
+    fileToClose: null,
+    showCloseFileDialogModal: false,
+  },
   setExplorerInteractionsState: () => defaultState.explorerInteractions,
+  setEditorInteractionsState: () => defaultState.explorerInteractions,
 };
 
 export const [useInteractionContext, InteractionContext] =
@@ -38,10 +56,17 @@ const InteractionContextProvider: FC<{
 }> = ({ children }) => {
   const [explorerInteractions, setExplorerInteractionsState] =
     useState<ExplorerInteractions>(defaultState.explorerInteractions);
+  const [editorInteractions, setEditorInteractionsState] =
+    useState<EditorInteractions>(defaultState.editorInteractions);
 
   return (
     <InteractionContext
-      value={{ explorerInteractions, setExplorerInteractionsState }}
+      value={{
+        explorerInteractions,
+        editorInteractions,
+        setExplorerInteractionsState,
+        setEditorInteractionsState,
+      }}
     >
       {children}
     </InteractionContext>

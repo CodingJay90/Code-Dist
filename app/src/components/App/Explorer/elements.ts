@@ -32,7 +32,7 @@ export const FolderName = styled.div`
 export const NestedFolder = styled.div``;
 // FILE ELEMENTS
 export const FileContainer = styled(FolderBlock)`
-  margin-left: ${(props) => props.theme.spacing(16)};
+  margin-left: 20px;
 `;
 export const FileWrapper = styled(FolderWrapper)``;
 export const FileName = styled(FolderName)``;

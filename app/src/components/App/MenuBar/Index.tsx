@@ -16,6 +16,7 @@ import {
 import { useUploadDirectory } from "@/graphql/mutations/app.mutations";
 import { useInteractionContext } from "@/contexts/interactions/InteractionContextProvider";
 import { useAppSelector } from "@/reduxStore/hooks";
+import { VscCircleFilled } from "react-icons/vsc";
 
 const MenuBar = () => {
   const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
@@ -102,7 +103,8 @@ const MenuBar = () => {
       <InfoContainer justify="center">
         {activeOpenedFile && (
           <>
-            {activeOpenedFile.isModified === true && <Status />}
+            {/* {activeOpenedFile.isModified === true && <Status />} */}
+            {activeOpenedFile.isModified === true && <VscCircleFilled />}
             <FileName>{activeOpenedFile?.file_name} -</FileName>
           </>
         )}

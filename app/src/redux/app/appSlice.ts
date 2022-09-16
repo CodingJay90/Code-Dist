@@ -3,9 +3,13 @@ import type { RootState } from "@/reduxStore/store";
 import { IDirectory, IFile } from "@/graphql/models/app.interface";
 import UseLocalStorage from "@/utils/storage";
 
-// Define a type for the slice state
+interface DirectoryTree {
+  directories: IDirectory[];
+  root_dir_files: IFile[];
+}
+
 interface AppState {
-  directoryTree: IDirectory[];
+  directoryTree: DirectoryTree;
   openedFiles: IFile[];
   selectedFile: IFile | null;
   activeOpenedFile: IFile | null;
@@ -14,7 +18,7 @@ interface AppState {
 
 const getLocalStorage = UseLocalStorage.getInstance();
 const initialState: AppState = {
-  directoryTree: [],
+  directoryTree: { directories: [], root_dir_files: [] },
   openedFiles: getLocalStorage.getOpenedFiles(),
   activeOpenedFile: getLocalStorage.getActiveOpenedFile(),
   selectedFile: null,
@@ -25,7 +29,7 @@ export const app = createSlice({
   name: "app",
   initialState,
   reducers: {
-    updateDirectoryTree: (state, action: PayloadAction<IDirectory[]>) => {
+    setDirectoryTree: (state, action: PayloadAction<DirectoryTree>) => {
       state.directoryTree = action.payload;
     },
     addToOpenedFiles: (state, action: PayloadAction<IFile>) => {
@@ -79,21 +83,69 @@ export const app = createSlice({
       state.openedFiles = updatedOpenedFiles;
       state.activeOpenedFile = fileToUpdate;
     },
+    updateFile: (
+      state,
+      action: PayloadAction<{ fileToUpdate: IFile; status: boolean }>
+    ) => {
+      const fileToUpdate = JSON.parse(
+        JSON.stringify(action.payload.fileToUpdate)
+      ) as IFile;
+      fileToUpdate.isModified = action.payload.status;
+      const updatedOpenedFiles = state.openedFiles.map((file) =>
+        file._id === fileToUpdate._id ? fileToUpdate : file
+      );
+      getLocalStorage.setOpenedFiles(updatedOpenedFiles);
+      getLocalStorage.setActiveOpenedFile(fileToUpdate);
+      state.openedFiles = updatedOpenedFiles;
+      state.activeOpenedFile = fileToUpdate;
+    },
     setWorkspaceName: (state, action: PayloadAction<string>) => {
       state.workspaceName = action.payload;
+    },
+    updateDirectoryTree: (state, action: PayloadAction<IFile>) => {
+      const directoryTree = JSON.parse(
+        JSON.stringify(current(state.directoryTree))
+      ) as DirectoryTree;
+
+      const recursiveUpdate = (
+        array: IDirectory[],
+        searchTerm: string
+      ): IDirectory[] => {
+        return array.reduce((prev: any, curr) => {
+          const subDirectory = curr.sub_directory
+            ? recursiveUpdate(curr.sub_directory, searchTerm)
+            : undefined;
+          curr.files = curr.files.map((i) => {
+            if (i._id === action.payload._id) i = action.payload;
+            return i;
+          });
+          return [...prev, { ...curr, subDirectory }];
+        }, []);
+      };
+      state.directoryTree.directories = recursiveUpdate(
+        directoryTree.directories,
+        action.payload._id
+      );
+    },
+    removeAllFilesOnView: (state) => {
+      state.activeOpenedFile = null;
+      getLocalStorage.setActiveOpenedFile(null);
+      getLocalStorage.setOpenedFiles([]);
+      state.openedFiles = [];
     },
   },
 });
 
 export const {
-  updateDirectoryTree,
+  setDirectoryTree,
   addToOpenedFiles,
   setActiveOpenedFile,
   setWorkspaceName,
   toggleFileModifiedStatus,
   removeFileFromOpenedFiles,
+  updateDirectoryTree,
+  updateFile,
+  removeAllFilesOnView,
 } = app.actions;
-
-export const selectCount = (state: RootState) => state.app;
 
 export default app.reducer;

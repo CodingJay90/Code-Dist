@@ -16,10 +16,14 @@ import {
 import { FcFile } from "react-icons/fc";
 import { IFile } from "@/graphql/models/app.interface";
 import CloseEditedFileModal from "@/components/Modal/CloseEditedFileModal/Index";
+import { VscCircleFilled } from "react-icons/vsc";
+import { useInteractionContext } from "@/contexts/interactions/InteractionContextProvider";
 
 const OpenedEditorsPanel = () => {
   const [showDialogModal, setShowDialogModal] = useState<boolean>(false);
-  const [fileToClose, setFileToClose] = useState<string>("");
+  const [fileToClose, setFileToClose] = useState<IFile | null>(null);
+  const { editorInteractions, setEditorInteractionsState } =
+    useInteractionContext();
   const dispatch = useAppDispatch();
   const { openedFiles, activeOpenedFile } = useAppSelector(
     (state) => state.app
@@ -27,8 +31,13 @@ const OpenedEditorsPanel = () => {
   function onFileClose(e: React.MouseEvent, file: IFile): void {
     e.stopPropagation();
     if (file.isModified) {
-      setFileToClose(file.file_name);
-      setShowDialogModal(true);
+      // setFileToClose(file);
+      // setShowDialogModal(true);
+      setEditorInteractionsState({
+        ...editorInteractions,
+        showCloseFileDialogModal: true,
+        fileToClose: file,
+      });
     } else {
       dispatch(removeFileFromOpenedFiles(file._id));
     }
@@ -45,20 +54,24 @@ const OpenedEditorsPanel = () => {
             <PanelGroup>
               <FcFile />
               <PanelName>{file.file_name}</PanelName>
-              <PanelStatus
-                onClick={(e) => onFileClose(e, file)}
-                visibility={file.isModified ? "visible" : "hidden"}
-              ></PanelStatus>
+              <PanelStatus onClick={(e) => onFileClose(e, file)}>
+                {file.isModified && <VscCircleFilled />}
+              </PanelStatus>
             </PanelGroup>
           </Panel>
         ))}
       </PanelContainerWrapper>
-      <CloseEditedFileModal
+      {/* <CloseEditedFileModal
         showModal={showDialogModal}
         setShowModal={setShowDialogModal}
+        onDontSaveClick={() => {
+          if (!fileToClose) return;
+          dispatch(removeFileFromOpenedFiles(fileToClose._id));
+          setShowDialogModal(false);
+        }}
         message={`Do you want to make changes made to ${fileToClose}?`}
         subMessage="Your changes will be lost if you don't save them."
-      />
+      /> */}
     </PanelContainer>
   );
 };

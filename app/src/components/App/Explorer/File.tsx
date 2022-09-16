@@ -80,7 +80,6 @@ const File = ({ file, directoryPath }: IProps) => {
       //left click
       dispatch(setActiveOpenedFile(file));
       dispatch(addToOpenedFiles(file));
-      //  setShowSubFolders(!showSubFolders);
     }
     if (e.button === 2) {
       setCursorPosition({

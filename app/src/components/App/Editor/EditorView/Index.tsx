@@ -2,8 +2,16 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Container } from "./elements";
 import * as monaco from "monaco-editor";
 import { useAppDispatch, useAppSelector } from "@/reduxStore/hooks";
-import { toggleFileModifiedStatus } from "@/reduxStore/app/appSlice";
+import {
+  removeFileFromOpenedFiles,
+  toggleFileModifiedStatus,
+  updateFile,
+} from "@/reduxStore/app/appSlice";
 import { useHotkeys } from "react-hotkeys-hook";
+import { useUpdateFileContent } from "@/graphql/mutations/app.mutations";
+import CloseEditedFileModal from "@/components/Modal/CloseEditedFileModal/Index";
+import { useInteractionContext } from "@/contexts/interactions/InteractionContextProvider";
+import { IFile } from "@/graphql/models/app.interface";
 
 const LanguageMapper: { [key: string]: string } = {
   js: "javascript",
@@ -27,17 +35,21 @@ const EditorView = () => {
   const [typingState, setTypingState] = useState<boolean>(false);
   const editorRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useAppDispatch();
+  const { editorInteractions, setEditorInteractionsState } =
+    useInteractionContext();
+  const { updateFileContent } = useUpdateFileContent();
   const { activeOpenedFile } = useAppSelector((state) => state.app);
 
   useHotkeys(
     "ctrl+s, cmd+s",
     function () {
-      dispatch(
-        toggleFileModifiedStatus({
-          fileId: activeOpenedFile?._id ?? "",
-          status: false,
-        })
-      );
+      if (!activeOpenedFile) return;
+      const fileContent = mnEditor?.getValue() ?? activeOpenedFile.file_content;
+      const file = {
+        ...activeOpenedFile,
+        file_content: fileContent,
+      };
+      saveFile(file);
     },
     {
       filterPreventDefault: true,
@@ -46,7 +58,36 @@ const EditorView = () => {
     }
   );
 
+  function saveFile(file: IFile): void {
+    dispatch(
+      updateFile({
+        fileToUpdate: {
+          ...file,
+          file_content: file.file_content,
+        },
+        status: false,
+      })
+    );
+    updateFileContent({
+      variables: {
+        input: {
+          _id: file._id,
+          file_content: file.file_content,
+        },
+      },
+    });
+  }
+  function closeFile(): void {
+    if (!editorInteractions.fileToClose) return;
+    dispatch(removeFileFromOpenedFiles(editorInteractions.fileToClose._id));
+    setEditorInteractionsState({
+      ...editorInteractions,
+      showCloseFileDialogModal: false,
+    });
+  }
+
   function setEditorModel(): void {
+    if (!editorRef.current) return;
     const editor = monaco.editor.create(editorRef.current!, {
       value: activeOpenedFile?.file_content ?? "",
       language: LanguageMapper[activeOpenedFile?.file_type ?? "js"],
@@ -64,9 +105,10 @@ const EditorView = () => {
     editor: monaco.editor.IStandaloneCodeEditor
   ): void {
     const disposableKeyDownEvent = editor.onKeyDown((e) => {
+      if (!activeOpenedFile) return;
       dispatch(
-        toggleFileModifiedStatus({
-          fileId: activeOpenedFile?._id ?? "",
+        updateFile({
+          fileToUpdate: activeOpenedFile,
           status: true,
         })
       );
@@ -86,8 +128,28 @@ const EditorView = () => {
       setEditorModel();
     }
   }, [activeOpenedFile?.file_content]);
-
-  return <Container ref={editorRef}></Container>;
+  return (
+    <>
+      <Container ref={editorRef}></Container>;
+      <CloseEditedFileModal
+        showModal={editorInteractions.showCloseFileDialogModal}
+        setShowModal={(state: boolean) => {
+          setEditorInteractionsState({
+            ...editorInteractions,
+            showCloseFileDialogModal: state,
+          });
+        }}
+        onDontSaveClick={closeFile}
+        onSaveClick={() => {
+          if (!editorInteractions.fileToClose) return;
+          saveFile(editorInteractions.fileToClose);
+          closeFile();
+        }}
+        message={`Do you want to make changes made to ${editorInteractions.fileToClose?.file_name}?`}
+        subMessage="Your changes will be lost if you don't save them."
+      />
+    </>
+  );
 };
 
 export default EditorView;

@@ -52,6 +52,6 @@ export const NativeModalFooterContainer = styled.div`
   width: 50%;
   margin-left: auto;
   display: flex;
-  justify-content: flex-start;
+  justify-content: flex-end;
   padding: 0.6rem 0;
 `;

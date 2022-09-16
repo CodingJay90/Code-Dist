@@ -3,10 +3,7 @@ import { gql, NetworkStatus, useLazyQuery, useQuery } from "@apollo/client";
 import { IDirectory, IFile } from "@/graphql/models/app.interface";
 import { DIRECTORY_TREE_FRAGMENT } from "./fragments";
 import { useAppDispatch } from "@/reduxStore/hooks";
-import {
-  setWorkspaceName,
-  updateDirectoryTree,
-} from "@/reduxStore/app/appSlice";
+import { setWorkspaceName, setDirectoryTree } from "@/reduxStore/app/appSlice";
 import { useEffect } from "react";
 // TBD: move this to a rest Api in order to get around the infinite recursion prevented by Graphql
 export const GET_DIRECTORY_TREE = gql`
@@ -92,9 +89,15 @@ export const useGetDirectoryTree = () => {
   const networkStatusLoading = networkStatus !== NetworkStatus.ready; //refetch wouldn't update loading state
   useEffect(() => {
     if (data?.getDirectoryTree) {
+      const { directories, root_dir_files } = data.getDirectoryTree;
       const workspaceName: string =
-        data.getDirectoryTree.directories[0].directory_path.split("/")[0] ?? "";
-      dispatch(updateDirectoryTree(data.getDirectoryTree.directories));
+        directories[0].directory_path.split("/")[0] ?? "";
+      dispatch(
+        setDirectoryTree({
+          directories,
+          root_dir_files,
+        })
+      );
       dispatch(setWorkspaceName(workspaceName));
     }
   }, [data]);

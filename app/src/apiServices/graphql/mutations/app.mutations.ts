@@ -53,6 +53,11 @@ const UPLOAD_DIRECTORY = gql`
     uploadZip(file: $file)
   }
 `;
+const UPDATE_FILE_CONTENT = gql`
+  mutation UpdateFileContent($input: UpdateFileContentInput!) {
+    updateFileContent(input: $input)
+  }
+`;
 
 export const useCreateDirectory = (args: {
   directoryName: string;
@@ -275,3 +280,27 @@ export const useUploadDirectory = () => {
 
   return { loading, error, uploadDirectory };
 };
+
+export const useUpdateFileContent = () => {
+  const [updateFileContent, { error, data }] = useMutation(UPDATE_FILE_CONTENT);
+
+  return { updateFileContent, data, error };
+};
+// export const useUpdateFileContent = (args: {
+//   fileId: string;
+//   fileContent: string;
+// }) => {
+//   const [updateFileContent, { error, data }] = useMutation<
+//     { updateFileContent: boolean },
+//     { input: Pick<IFile, "_id" | "file_content"> }
+//   >(UPDATE_FILE_CONTENT, {
+//     variables: {
+// input: {
+//   _id: args.fileId,
+//   file_content: args.fileContent,
+// },
+//     },
+//   });
+
+//   return { updateFileContent, data, error };
+// };
