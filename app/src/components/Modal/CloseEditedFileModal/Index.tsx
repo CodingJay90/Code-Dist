@@ -21,9 +21,13 @@ import {
 
 interface IProps {
   showModal: boolean;
-  setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowModal: (
+    state: boolean
+  ) => void | React.Dispatch<React.SetStateAction<boolean>>;
   message: string;
   subMessage: string;
+  onDontSaveClick: () => void;
+  onSaveClick: () => void;
 }
 
 const CloseEditedFileModal = ({
@@ -31,6 +35,8 @@ const CloseEditedFileModal = ({
   setShowModal,
   message,
   subMessage,
+  onDontSaveClick,
+  onSaveClick,
 }: IProps) => {
   function closeModal(): void {
     setShowModal(false);
@@ -57,8 +63,10 @@ const CloseEditedFileModal = ({
           </ModalContentContainer>
           <NativeModalFooter>
             <NativeModalFooterContainer>
-              <NativeModalButton>save</NativeModalButton>
-              <NativeModalButton>Don't save</NativeModalButton>
+              <NativeModalButton onClick={onSaveClick}>save</NativeModalButton>
+              <NativeModalButton onClick={onDontSaveClick}>
+                Don't save
+              </NativeModalButton>
               <NativeModalButton onClick={closeModal}>cancel</NativeModalButton>
             </NativeModalFooterContainer>
           </NativeModalFooter>

@@ -127,6 +127,12 @@ export const app = createSlice({
         action.payload._id
       );
     },
+    removeAllFilesOnView: (state) => {
+      state.activeOpenedFile = null;
+      getLocalStorage.setActiveOpenedFile(null);
+      getLocalStorage.setOpenedFiles([]);
+      state.openedFiles = [];
+    },
   },
 });
 
@@ -139,6 +145,7 @@ export const {
   removeFileFromOpenedFiles,
   updateDirectoryTree,
   updateFile,
+  removeAllFilesOnView,
 } = app.actions;
 
 export default app.reducer;
