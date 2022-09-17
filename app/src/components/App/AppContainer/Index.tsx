@@ -11,7 +11,6 @@ const AppContainer = () => {
   const [view, setView] = useState<ExplorerView>(ExplorerView.EXPLORER);
 
   function renderExplorerView(): JSX.Element {
-    console.log("run");
     switch (view) {
       case ExplorerView.EXPLORER:
         return <Explorer />;
