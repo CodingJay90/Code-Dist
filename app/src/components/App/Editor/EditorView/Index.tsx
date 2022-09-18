@@ -6,6 +6,7 @@ import {
   removeFileFromOpenedFiles,
   toggleFileModifiedStatus,
   updateFile,
+  updateFileOnEditorLeave,
 } from "@/reduxStore/app/appSlice";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useUpdateFileContent } from "@/graphql/mutations/app.mutations";
@@ -26,6 +27,7 @@ const LanguageMapper: { [key: string]: string } = {
   handlebar: "html",
   hbs: "html",
   json: "json",
+  map: "json",
   jsonp: "jsonp",
 };
 
@@ -39,7 +41,7 @@ const EditorView = () => {
     useInteractionContext();
   const { updateFileContent } = useUpdateFileContent();
   const { activeOpenedFile } = useAppSelector((state) => state.app);
-
+  const [prevOpenedFile, setPrevOpenedFile] = useState<IFile | null>(null);
   useHotkeys(
     "ctrl+s, cmd+s",
     function () {
@@ -77,6 +79,7 @@ const EditorView = () => {
       },
     });
   }
+
   function closeFile(): void {
     if (!editorInteractions.fileToClose) return;
     dispatch(removeFileFromOpenedFiles(editorInteractions.fileToClose._id));
@@ -99,6 +102,36 @@ const EditorView = () => {
     });
     setMnEditor(editor);
     setFileModifiedStatusOnType(editor);
+
+    editor.onDidBlurEditorText(() => {
+      // editor.focus();
+      console.log(activeOpenedFile);
+      console.log(editor?.getValue());
+      saveFileContentOnDispose(editor.getValue());
+    });
+    // setPrevOpenedFile(mnEditor?.getValue() ?? "");
+    // editor.onMouseLeave(() => {
+    //   console.log(activeOpenedFile?.file_name);
+    //   console.log(mnEditor?.getValue());
+    // });
+    // editor.onDidDispose(() => {
+    //   saveFileContentOnDispose();
+    // });
+  }
+
+  function saveFileContentOnDispose(fileContent: string): void {
+    if (activeOpenedFile) {
+      // console.log(prevOpenedFile);
+      dispatch(
+        updateFileOnEditorLeave({
+          fileToUpdate: {
+            ...activeOpenedFile,
+            file_content: fileContent, //prevOpenedFile?.file_content ?? activeOpenedFile.file_content, //mnEditor?.getValue() ?? activeOpenedFile.file_content,
+          },
+          status: true,
+        })
+      );
+    }
   }
 
   function setFileModifiedStatusOnType(
@@ -112,7 +145,7 @@ const EditorView = () => {
           status: true,
         })
       );
-      disposableKeyDownEvent.dispose();
+      // disposableKeyDownEvent.dispose();
     });
   }
 
@@ -124,10 +157,19 @@ const EditorView = () => {
 
   useEffect(() => {
     if (mnEditor) {
+      activeOpenedFile &&
+        setPrevOpenedFile({
+          ...activeOpenedFile,
+          file_content: mnEditor?.getValue() ?? "",
+        }); //use this to update the fileContent on file change(editor dispose)
       mnEditor.dispose();
       setEditorModel();
     }
-  }, [activeOpenedFile?.file_content]);
+    // console.log(activeOpenedFile);
+    // console.log(prevOpenedFile?.file_content);
+    // console.log(mnEditor?.getValue() ?? "");
+  }, [activeOpenedFile?._id]);
+
   return (
     <>
       <Container ref={editorRef}></Container>;

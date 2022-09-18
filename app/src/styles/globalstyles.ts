@@ -1,7 +1,6 @@
 import { createGlobalStyle } from "styled-components";
 
 const GlobalStyle = createGlobalStyle`
-@import url(https://fonts.googleapis.com/css?family=K2D:300,400,500,700,800);
   body {
     margin: 0;
     padding: 0;

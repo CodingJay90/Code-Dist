@@ -86,6 +86,11 @@ const OpenedEditorsNav = () => {
     dispatch(addToOpenedFiles(untitledFile));
   }
 
+  function saveAllOpenedFile(): void {
+    const filesToSave = openedFiles.filter((file) => file.isModified);
+    console.log(filesToSave);
+  }
+
   return (
     <>
       <Wrapper>
@@ -104,7 +109,7 @@ const OpenedEditorsNav = () => {
             >
               <VscNewFile />
             </NavButtonListItem>
-            <NavButtonListItem title="Save All">
+            <NavButtonListItem title="Save All" onClick={saveAllOpenedFile}>
               <VscSaveAll />
             </NavButtonListItem>
             <NavButtonListItem

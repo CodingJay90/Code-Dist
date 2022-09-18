@@ -99,6 +99,21 @@ export const app = createSlice({
       state.openedFiles = updatedOpenedFiles;
       state.activeOpenedFile = fileToUpdate;
     },
+    updateFileOnEditorLeave: (
+      state,
+      action: PayloadAction<{ fileToUpdate: IFile; status: boolean }>
+    ) => {
+      const fileToUpdate = JSON.parse(
+        JSON.stringify(action.payload.fileToUpdate)
+      ) as IFile;
+      const updatedOpenedFiles = current(state.openedFiles).map((file) =>
+        file._id === fileToUpdate._id ? fileToUpdate : file
+      );
+      // console.log(updatedOpenedFiles);
+      // console.log(fileToUpdate);
+      getLocalStorage.setOpenedFiles(updatedOpenedFiles);
+      state.openedFiles = updatedOpenedFiles;
+    },
     setWorkspaceName: (state, action: PayloadAction<string>) => {
       state.workspaceName = action.payload;
     },
@@ -146,6 +161,7 @@ export const {
   updateDirectoryTree,
   updateFile,
   removeAllFilesOnView,
+  updateFileOnEditorLeave,
 } = app.actions;
 
 export default app.reducer;
