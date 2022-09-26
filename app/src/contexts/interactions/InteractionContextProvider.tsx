@@ -15,6 +15,7 @@ interface ExplorerInteractions {
 interface EditorInteractions {
   fileToClose: IFile | null;
   showCloseFileDialogModal: boolean;
+  showCloseUntitledFileDialogModal: boolean;
 }
 
 type ExplorerInteractionsUpdateType = React.Dispatch<
@@ -43,6 +44,7 @@ const defaultState: InteractionCTXInterface = {
   editorInteractions: {
     fileToClose: null,
     showCloseFileDialogModal: false,
+    showCloseUntitledFileDialogModal: false,
   },
   setExplorerInteractionsState: () => defaultState.explorerInteractions,
   setEditorInteractionsState: () => defaultState.explorerInteractions,
