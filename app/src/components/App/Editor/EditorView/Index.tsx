@@ -12,7 +12,8 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { useUpdateFileContent } from "@/graphql/mutations/app.mutations";
 import CloseEditedFileModal from "@/components/Modal/CloseEditedFileModal/Index";
 import { useInteractionContext } from "@/contexts/interactions/InteractionContextProvider";
-import { IFile } from "@/graphql/models/app.interface";
+import { IDirectory, IFile } from "@/graphql/models/app.interface";
+import SaveUntitledFileModal from "@/components/Modal/SaveUntitledFileModal/Index";
 
 const LanguageMapper: { [key: string]: string } = {
   js: "javascript",
@@ -35,13 +36,17 @@ const EditorView = () => {
   const [mnEditor, setMnEditor] =
     useState<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [typingState, setTypingState] = useState<boolean>(false);
+
+  const [directoriesToAddUntitledFile, setDirectoriesToAddUntitledFile] =
+    useState<IDirectory[]>([]);
   const editorRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useAppDispatch();
   const { editorInteractions, setEditorInteractionsState } =
     useInteractionContext();
   const { updateFileContent } = useUpdateFileContent();
-  const { activeOpenedFile } = useAppSelector((state) => state.app);
-  const [prevOpenedFile, setPrevOpenedFile] = useState<IFile | null>(null);
+  const { activeOpenedFile, directoryTree } = useAppSelector(
+    (state) => state.app
+  );
   useHotkeys(
     "ctrl+s, cmd+s",
     function () {
@@ -51,6 +56,7 @@ const EditorView = () => {
         ...activeOpenedFile,
         file_content: fileContent,
       };
+      console.log(activeOpenedFile);
       saveFile(file);
     },
     {
@@ -61,6 +67,22 @@ const EditorView = () => {
   );
 
   function saveFile(file: IFile): void {
+    if (file?.isUntitled) {
+      let directoryList: IDirectory[] = [];
+      const iterate = (directories: IDirectory[]) =>
+        directories.map((dir) => {
+          directoryList.push(dir);
+          if (dir.sub_directory) iterate(dir.sub_directory);
+        });
+      iterate(directoryTree.directories);
+      setDirectoriesToAddUntitledFile(directoryList);
+      setEditorInteractionsState({
+        ...editorInteractions,
+        showCloseUntitledFileDialogModal: true,
+      });
+      return;
+    }
+    // console.log(file);
     dispatch(
       updateFile({
         fileToUpdate: {
@@ -104,31 +126,19 @@ const EditorView = () => {
     setFileModifiedStatusOnType(editor);
 
     editor.onDidBlurEditorText(() => {
-      // editor.focus();
-      console.log(activeOpenedFile);
-      console.log(editor?.getValue());
       saveFileContentOnDispose(editor.getValue());
     });
-    // setPrevOpenedFile(mnEditor?.getValue() ?? "");
-    // editor.onMouseLeave(() => {
-    //   console.log(activeOpenedFile?.file_name);
-    //   console.log(mnEditor?.getValue());
-    // });
-    // editor.onDidDispose(() => {
-    //   saveFileContentOnDispose();
-    // });
   }
 
   function saveFileContentOnDispose(fileContent: string): void {
     if (activeOpenedFile) {
-      // console.log(prevOpenedFile);
       dispatch(
         updateFileOnEditorLeave({
           fileToUpdate: {
             ...activeOpenedFile,
-            file_content: fileContent, //prevOpenedFile?.file_content ?? activeOpenedFile.file_content, //mnEditor?.getValue() ?? activeOpenedFile.file_content,
+            file_content: fileContent,
           },
-          status: true,
+          status: activeOpenedFile.isModified ?? false,
         })
       );
     }
@@ -157,17 +167,9 @@ const EditorView = () => {
 
   useEffect(() => {
     if (mnEditor) {
-      activeOpenedFile &&
-        setPrevOpenedFile({
-          ...activeOpenedFile,
-          file_content: mnEditor?.getValue() ?? "",
-        }); //use this to update the fileContent on file change(editor dispose)
       mnEditor.dispose();
       setEditorModel();
     }
-    // console.log(activeOpenedFile);
-    // console.log(prevOpenedFile?.file_content);
-    // console.log(mnEditor?.getValue() ?? "");
   }, [activeOpenedFile?._id]);
 
   return (
@@ -189,6 +191,23 @@ const EditorView = () => {
         }}
         message={`Do you want to make changes made to ${editorInteractions.fileToClose?.file_name}?`}
         subMessage="Your changes will be lost if you don't save them."
+      />
+      <SaveUntitledFileModal
+        showModal={editorInteractions.showCloseUntitledFileDialogModal}
+        setShowModal={(state: boolean) => {
+          setEditorInteractionsState({
+            ...editorInteractions,
+            showCloseUntitledFileDialogModal: state,
+          });
+        }}
+        onDontSaveClick={closeFile}
+        // onSaveClick={() => {
+        //   if (!editorInteractions.fileToClose) return;
+        //   saveFile(editorInteractions.fileToClose);
+        //   closeFile();
+        // }}
+        defaultFileName={editorInteractions.fileToClose?.file_name ?? ""}
+        directories={directoriesToAddUntitledFile}
       />
     </>
   );

@@ -48,7 +48,6 @@ export const app = createSlice({
       const openedFiles = current(state.openedFiles);
       const lastFileOnOpenedFiles = openedFiles[openedFiles.length - 1];
       if (openedFiles.length !== 1) {
-        console.log("run here");
         state.activeOpenedFile = lastFileOnOpenedFiles;
         getLocalStorage.setActiveOpenedFile(lastFileOnOpenedFiles);
       } else {
@@ -59,10 +58,14 @@ export const app = createSlice({
       state.openedFiles = newState;
     },
     setActiveOpenedFile: (state, action: PayloadAction<IFile>) => {
+      console.log(action.payload.isUntitled);
       const newActiveOpenedFileState = {
         ...state.activeOpenedFile,
         ...action.payload,
+        ...(action.payload.isUntitled === undefined && { isUntitled: false }),
+        ...(action.payload.isModified === undefined && { isModified: false }),
       };
+      console.log(newActiveOpenedFileState);
       getLocalStorage.setActiveOpenedFile(newActiveOpenedFileState);
       state.activeOpenedFile = newActiveOpenedFileState;
     },
@@ -70,7 +73,7 @@ export const app = createSlice({
       state,
       action: PayloadAction<{ fileId: string; status: boolean }>
     ) => {
-      const fileToUpdate = state.openedFiles.find(
+      const fileToUpdate = current(state.openedFiles).find(
         (file) => file._id === action.payload.fileId
       );
       if (!fileToUpdate) return;
@@ -91,7 +94,7 @@ export const app = createSlice({
         JSON.stringify(action.payload.fileToUpdate)
       ) as IFile;
       fileToUpdate.isModified = action.payload.status;
-      const updatedOpenedFiles = state.openedFiles.map((file) =>
+      const updatedOpenedFiles = current(state.openedFiles).map((file) =>
         file._id === fileToUpdate._id ? fileToUpdate : file
       );
       getLocalStorage.setOpenedFiles(updatedOpenedFiles);
@@ -103,14 +106,14 @@ export const app = createSlice({
       state,
       action: PayloadAction<{ fileToUpdate: IFile; status: boolean }>
     ) => {
-      const fileToUpdate = JSON.parse(
-        JSON.stringify(action.payload.fileToUpdate)
-      ) as IFile;
+      const fileToUpdate = {
+        ...JSON.parse(JSON.stringify(action.payload.fileToUpdate)),
+        isModified: state.activeOpenedFile?.isModified ?? false,
+      } as IFile;
+      // fileToUpdate.isModified = action.payload.status;
       const updatedOpenedFiles = current(state.openedFiles).map((file) =>
         file._id === fileToUpdate._id ? fileToUpdate : file
       );
-      // console.log(updatedOpenedFiles);
-      // console.log(fileToUpdate);
       getLocalStorage.setOpenedFiles(updatedOpenedFiles);
       state.openedFiles = updatedOpenedFiles;
     },

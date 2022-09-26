@@ -81,6 +81,7 @@ const OpenedEditorsNav = () => {
       file_content: "",
       file_type: "",
       isDirectory: false,
+      isUntitled: true,
     };
     dispatch(setActiveOpenedFile(untitledFile));
     dispatch(addToOpenedFiles(untitledFile));

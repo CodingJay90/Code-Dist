@@ -7,6 +7,7 @@ export interface IFile {
   file_id: string;
   isDirectory: boolean;
   isModified?: boolean;
+  isUntitled?: boolean;
 }
 
 export interface IDirectory {
