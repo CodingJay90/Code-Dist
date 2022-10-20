@@ -37,7 +37,7 @@ const BackdropWithSpinner = () => {
   return (
     <Container>
       <SpinnerContainer>
-        <IconSpin size={50} />
+        <IconSpin size={50} color="#747373" />
       </SpinnerContainer>
     </Container>
   );

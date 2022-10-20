@@ -6,6 +6,8 @@ import ApolloClientWrapper from "./ApolloClientWrapper";
 import { Provider } from "react-redux";
 import { store } from "@/reduxStore/store";
 import { Helmet } from "react-helmet";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { DndProvider } from "react-dnd";
 
 const Entry = () => {
   return (
@@ -21,8 +23,10 @@ const Entry = () => {
       <Provider store={store}>
         <ApolloClientWrapper>
           <ThemeProvider theme={defaultTheme}>
-            <GlobalStyle />
-            <Routes />
+            <DndProvider backend={HTML5Backend}>
+              <GlobalStyle />
+              <Routes />
+            </DndProvider>
           </ThemeProvider>
         </ApolloClientWrapper>
       </Provider>

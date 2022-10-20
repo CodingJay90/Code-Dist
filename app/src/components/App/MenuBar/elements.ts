@@ -11,7 +11,7 @@ export const MenuBarGroup = styled(StyledFlex)`
   height: 100%;
 `;
 export const MenuBarButtonContainer = styled(StyledFlex)`
-  margin-left: 60px;
+  /* margin-left: 60px; */
 `;
 export const MenuBarButton = styled.button`
   text-transform: capitalize;
@@ -46,5 +46,18 @@ export const Status = styled.div`
 export const Brand = styled.div`
   text-transform: capitalize;
   font-size: 15px;
+`;
+export const AppLogoContainer = styled.div`
+  min-width: 60px;
+  max-width: 70px;
+  display: flex;
+  svg {
+    width: 100%;
+    transform: scale(1.4);
+  }
+`;
+export const AppLogo = styled.img`
+  width: 100%;
+  height: 100%;
 `;
 export const ViewContainer = styled.div``;

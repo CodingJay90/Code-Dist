@@ -108,9 +108,9 @@ const Explorer = () => {
           <FolderBlockContainer id="trx">
             {renderDirectoryTree()}
           </FolderBlockContainer>
-          {directoryTree.root_dir_files.map((i) => (
+          {/* {directoryTree.root_dir_files.map((i) => (
             <File directoryPath="test" file={i} key={i._id} />
-          ))}
+          ))} */}
         </Fragment>
       </SuspenseLoader>
     </StyledContainer>

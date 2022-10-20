@@ -1,6 +1,7 @@
 import { IFile } from "@/graphql/models/app.interface";
 import { useState, useEffect } from "react";
 import { FcFile } from "react-icons/fc";
+import { useDrag } from "react-dnd";
 import { FileContainer, FileIcon, FileName, FileWrapper } from "./elements";
 import ContextMenu from "@/components/App/ContextMenu/Index";
 import { ActionType } from "@/components/App/types";
@@ -32,6 +33,16 @@ const File = ({ file, directoryPath }: IProps) => {
     useInteractionContext();
 
   const { deleteFile } = useDeleteFile(file._id);
+  const [{ isDragged }, drag, dragPreview] = useDrag(() => ({
+    type: "file",
+    item: file,
+    collect: (monitor) => ({
+      isDragged: monitor.isDragging(),
+      item: monitor.getItem(),
+    }),
+  }));
+
+  // console.log(collected);
 
   useEffect(() => {
     if (
@@ -98,7 +109,13 @@ const File = ({ file, directoryPath }: IProps) => {
 
   return (
     <FileContainer nested={true}>
-      <FileWrapper justify="flex-start" onMouseDown={onFileClick}>
+      <FileWrapper
+        justify="flex-start"
+        isDragged={isDragged}
+        ref={drag}
+        onMouseUp={onFileClick}
+        title={file.file_dir}
+      >
         <FileIcon>
           <FcFile />
         </FileIcon>
