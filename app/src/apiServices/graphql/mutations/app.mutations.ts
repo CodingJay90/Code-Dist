@@ -48,6 +48,18 @@ const RENAME_FILE = gql`
     renameFile(input: $input)
   }
 `;
+const MOVE_FILE = gql`
+  mutation MoveFile($input: MoveFileInput!) {
+    moveFile(input: $input)
+  }
+`;
+const MOVE_DIRECTORY = gql`
+  mutation MoveDirectory($input: MoveDirectoryInput!) {
+    moveDirectory(input: $input) {
+      _id
+    }
+  }
+`;
 const UPLOAD_DIRECTORY = gql`
   mutation UploadZip($file: Upload!) {
     uploadZip(file: $file)
@@ -244,6 +256,34 @@ export const useRenameFile = (args: { fileName: string; id: string }) => {
   });
 
   return { renameFile, data, error };
+};
+
+export const useMoveFile = (args: {
+  destination_path: string;
+  file_id: string;
+}) => {
+  const [moveFileMutation, { error, data }] = useMutation<
+    { moveFile: boolean },
+    { input: Pick<IFile, "file_id"> & { destination_path: string } }
+  >(MOVE_FILE, {
+    variables: {
+      input: {
+        file_id: args.file_id,
+        destination_path: args.destination_path,
+      },
+    },
+  });
+
+  return { moveFileMutation, data, error };
+};
+
+export const useMoveDirectory = () => {
+  const [moveDirectoryMutation, { error, data }] = useMutation<
+    { moveDirectory: IDirectory },
+    { input: { destination_path: string; from_id: string } }
+  >(MOVE_DIRECTORY);
+
+  return { moveDirectoryMutation, data, error };
 };
 
 export const useDeleteFile = (id: string) => {

@@ -137,7 +137,7 @@ export const app = createSlice({
             if (i._id === action.payload._id) i = action.payload;
             return i;
           });
-          return [...prev, { ...curr, subDirectory }];
+          return [...prev, { ...curr, sub_directory: subDirectory }];
         }, []);
       };
       state.directoryTree.directories = recursiveUpdate(
@@ -150,6 +150,99 @@ export const app = createSlice({
       getLocalStorage.setActiveOpenedFile(null);
       getLocalStorage.setOpenedFiles([]);
       state.openedFiles = [];
+    },
+    moveFile: (
+      state,
+      action: PayloadAction<{ file: IFile; directory: IDirectory }>
+    ) => {
+      const { file, directory } = action.payload;
+      const directoryTree = JSON.parse(
+        JSON.stringify(current(state.directoryTree))
+      ) as DirectoryTree;
+
+      const recursiveUpdate = (array: IDirectory[]): IDirectory[] => {
+        return array.reduce((prev: any, curr) => {
+          const subDirectory = curr.sub_directory
+            ? recursiveUpdate(curr.sub_directory)
+            : undefined;
+          curr.files.splice(curr.files.indexOf(file));
+          if (curr._id === directory._id) {
+            curr.files.push(file);
+          }
+          return [...prev, { ...curr, sub_directory: subDirectory }];
+        }, []);
+      };
+      // console.log(recursiveUpdate(directoryTree.directories));
+      state.directoryTree.directories = recursiveUpdate(
+        directoryTree.directories
+      );
+    },
+    moveFolder: (
+      state,
+      action: PayloadAction<{
+        prevDirectory: IDirectory;
+        newDirectory: IDirectory;
+      }>
+    ) => {
+      const { newDirectory, prevDirectory } = action.payload;
+      const directoryTree = JSON.parse(
+        JSON.stringify(current(state.directoryTree))
+      ) as DirectoryTree;
+      if (prevDirectory.directory_path === newDirectory.directory_path) return;
+      const recursiveUpdate = (array: IDirectory[]): IDirectory[] => {
+        return array.reduce((prev: any, curr) => {
+          if (curr._id === prevDirectory._id) {
+            const updateFilePath = (
+              dir: IDirectory[],
+              path: string
+            ): IDirectory[] => {
+              return dir.map((i) => {
+                const newPath = `${path}${i.directory_name}/`;
+                i = {
+                  ...i,
+                  directory_path: newPath,
+                  files: i.files.map((file) => ({
+                    ...file,
+                    file_dir: newPath.concat(file.file_name),
+                  })),
+                };
+                if (i.sub_directory.length)
+                  updateFilePath(i.sub_directory, newPath);
+                return i;
+              });
+            };
+            const newPath = `${curr.directory_path}${newDirectory.directory_name}/`;
+            let newUpdatedDirectory = {
+              ...newDirectory,
+              directory_path: newPath,
+              files: newDirectory.files.map((i) => ({
+                ...i,
+                file_dir: newPath.concat(i.file_name),
+              })),
+            };
+            curr.sub_directory.push({
+              ...newUpdatedDirectory,
+              sub_directory: updateFilePath(
+                newUpdatedDirectory.sub_directory,
+                newPath
+              ),
+            });
+            // console.log(
+            //   updateFilePath(newUpdatedDirectory.sub_directory, newPath)
+            // );
+          }
+          const subDirectory = curr.sub_directory
+            ? recursiveUpdate(curr.sub_directory)
+            : undefined;
+          return [...prev, { ...curr, sub_directory: subDirectory }].filter(
+            (x) => x.directory_path !== newDirectory.directory_path
+          );
+        }, []);
+      };
+      // console.log(recursiveUpdate(directoryTree.directories));
+      state.directoryTree.directories = recursiveUpdate(
+        directoryTree.directories
+      );
     },
   },
 });
@@ -165,6 +258,8 @@ export const {
   updateFile,
   removeAllFilesOnView,
   updateFileOnEditorLeave,
+  moveFile,
+  moveFolder,
 } = app.actions;
 
 export default app.reducer;

@@ -1,6 +1,8 @@
 import { ChangeEvent, MouseEvent, useRef, useState } from "react";
 import ContextMenu from "@/components/App/ContextMenu/Index";
 import {
+  AppLogo,
+  AppLogoContainer,
   Brand,
   DirName,
   FileName,
@@ -17,6 +19,9 @@ import { useUploadDirectory } from "@/graphql/mutations/app.mutations";
 import { useInteractionContext } from "@/contexts/interactions/InteractionContextProvider";
 import { useAppSelector } from "@/reduxStore/hooks";
 import { VscCircleFilled } from "react-icons/vsc";
+import Logo from "@/assets/icons/brand.svg";
+import BrandIcon from "@/assets/icons/BrandIcon";
+// import BrandIcon from "@/assets/icons/BrandIcon";
 
 const MenuBar = () => {
   const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
@@ -85,7 +90,11 @@ const MenuBar = () => {
 
   return (
     <MenuBarContainer>
-      <MenuBarGroup>
+      <MenuBarGroup id="o">
+        <AppLogoContainer>
+          {/* <AppLogo src={Logo} /> */}
+          <BrandIcon />
+        </AppLogoContainer>
         <MenuBarButtonContainer>
           <MenuBarButton onClick={onFileMenuClick}>file</MenuBarButton>
           <MenuBarButton>edit</MenuBarButton>

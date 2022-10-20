@@ -1,19 +1,33 @@
 import { StyledFlex } from "@/elements/Global";
-import { IDirectory } from "@/graphql/models/app.interface";
+import { IDirectory, IFile } from "@/graphql/models/app.interface";
 import { useState, useEffect } from "react";
 import ContextMenu from "@/components/App/ContextMenu/Index";
 import {
   FolderArrowIcon,
   FolderBlock,
+  FolderDragWrapper,
+  FolderDropWrapper,
   FolderIcon,
   FolderName,
   FolderWrapper,
   NestedFolder,
 } from "./elements";
 import TextField from "@/components/App/TextField/Index";
-import { useDeleteDirectory } from "@/graphql/mutations/app.mutations";
+import {
+  useDeleteDirectory,
+  useMoveDirectory,
+  useMoveFile,
+} from "@/graphql/mutations/app.mutations";
 import { ActionType } from "@/components/App/types";
 import { useInteractionContext } from "@/contexts/interactions/InteractionContextProvider";
+import { useDrag, useDrop } from "react-dnd";
+import { useAppDispatch } from "@/reduxStore/hooks";
+import {
+  moveFile,
+  moveFolder,
+  updateDirectoryTree,
+} from "@/reduxStore/app/appSlice";
+import { removeTrailingSlash } from "@/utils/string";
 
 interface IProps {
   folder: IDirectory;
@@ -33,10 +47,54 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
     y: number;
   }>({ x: 0, y: 0 });
   const [isDirectory, setIsDirectory] = useState<boolean>(true);
+  const [folderIdToDrop, setFolderIdToDrop] = useState<string>("");
+  const [fileIdToDrop, setFileIdToDrop] = useState<any>("");
+  const dispatch = useAppDispatch();
+
+  const [{ isDragged }, directoryDrag] = useDrag(() => ({
+    type: "directory",
+    item: folder,
+    collect: (monitor) => ({
+      isDragged: monitor.isDragging(),
+      item: monitor.getItem(),
+    }),
+  }));
+
+  const [{ directoryHover, directoryItemDrop }, directoryDrop] = useDrop(
+    () => ({
+      accept: "directory",
+      drop: onDropFolder,
+      collect: (monitor) => ({
+        directoryHover: monitor.isOver(),
+        directoryItemDrop: monitor.getItem(),
+      }),
+    })
+  );
+
+  const [{ isOver, item }, drop] = useDrop(() => ({
+    accept: "file",
+    drop: onDropFile,
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
+      item: monitor.getItem(),
+    }),
+  }));
 
   const { deleteDirectory } = useDeleteDirectory(
     folder._id ?? folder.directory_id
   );
+
+  const { moveFileMutation } = useMoveFile({
+    destination_path: folder.directory_path,
+    file_id: (item as IFile)?.file_id ?? "",
+  });
+
+  const { moveDirectoryMutation } = useMoveDirectory();
+
+  useEffect(() => {
+    setFileIdToDrop(item);
+    if (isOver || directoryHover) setShowSubFolders(true);
+  }, [isOver, directoryHover]);
 
   useEffect(() => {
     setShowSubFolders(false);
@@ -61,6 +119,57 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
     setShowTextField(true);
     setShowSubFolders(true);
     setIsDirectory(isDirectorySelected); //this is to trigger createFile function from textfield
+  }
+
+  function validateDroppedItem(droppedItem: IDirectory): boolean {
+    let droppedItemPathToSplit: string | string[] =
+      droppedItem.directory_path.split("/");
+    droppedItemPathToSplit.splice(droppedItemPathToSplit.length - 2, 2);
+    droppedItemPathToSplit = `${droppedItemPathToSplit.join("/")}/`;
+    const isSameDirectoryDropped =
+      folder.directory_path === droppedItem.directory_path;
+    if (isSameDirectoryDropped) return false; //return if folder is dropped into the same directory
+    if (
+      !isSameDirectoryDropped &&
+      folder.directory_path === droppedItemPathToSplit
+    )
+      return false; // return if folder is dropped in the same directory the moved folder is sitting at
+    if (
+      removeTrailingSlash(droppedItem.directory_path).split("/").join("/") ===
+      folder.directory_path
+        .split("/")
+        .splice(
+          0,
+          removeTrailingSlash(droppedItem.directory_path).split("/").length
+        )
+        .join("/")
+    ) {
+      console.log("okay");
+      return false;
+    } //return if folder dragged is dropped in it's sub_directory
+    return true;
+  }
+
+  function onDropFolder(droppedItem: IDirectory): void {
+    if (!validateDroppedItem(droppedItem)) return;
+    setFolderIdToDrop(droppedItem.directory_id);
+    moveDirectoryMutation({
+      variables: {
+        input: {
+          destination_path: folder.directory_path,
+          from_id: droppedItem._id,
+        },
+      },
+    });
+    console.log(folderIdToDrop);
+    console.log(droppedItem.directory_id);
+    dispatch(moveFolder({ prevDirectory: folder, newDirectory: droppedItem }));
+  }
+
+  function onDropFile(droppedItem: IFile) {
+    moveFileMutation();
+    // console.log("dropped", droppedItem);
+    dispatch(moveFile({ file: droppedItem, directory: folder }));
   }
 
   const menuItems = [
@@ -111,12 +220,25 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
   }
 
   return (
-    <FolderBlock key={folder.directory_id} nested={nested}>
-      <FolderWrapper justify="flex-start" onMouseDown={onFolderClick}>
-        <FolderArrowIcon direction={showSubFolders ? "down" : "right"} />
-        <FolderIcon />
-        <FolderName>{folder.directory_name}</FolderName>
-      </FolderWrapper>
+    <FolderBlock
+      key={folder.directory_id}
+      nested={nested}
+      isHovered={isOver || directoryHover}
+    >
+      <FolderDragWrapper ref={directoryDrag} isDragged={isDragged}>
+        <FolderDropWrapper ref={directoryDrop}>
+          <FolderWrapper
+            justify="flex-start"
+            fileHovered={isOver}
+            ref={drop}
+            onMouseDown={onFolderClick}
+          >
+            <FolderArrowIcon direction={showSubFolders ? "down" : "right"} />
+            <FolderIcon />
+            <FolderName>{folder.directory_name}</FolderName>
+          </FolderWrapper>
+        </FolderDropWrapper>
+      </FolderDragWrapper>
 
       <ContextMenu
         contextPosition={cursorPosition}
