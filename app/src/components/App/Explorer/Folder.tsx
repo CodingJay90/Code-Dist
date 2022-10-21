@@ -23,6 +23,7 @@ import { useInteractionContext } from "@/contexts/interactions/InteractionContex
 import { useDrag, useDrop } from "react-dnd";
 import { useAppDispatch } from "@/reduxStore/hooks";
 import {
+  deleteDirectoryOrFileAction,
   moveFile,
   moveFolder,
   updateDirectoryTree,
@@ -194,7 +195,10 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
       {
         shortcut: "",
         label: "delete",
-        onClick: () => deleteDirectory(),
+        onClick: () => {
+          deleteDirectory();
+          dispatch(deleteDirectoryOrFileAction({ directoryId: folder._id }));
+        },
       },
     ],
   ];
@@ -251,7 +255,7 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
         showTextField={showTextField}
         setShowTextField={setShowTextField}
         directoryPath={folder.directory_path}
-        directoryId={folder._id ?? folder.directory_id}
+        directoryId={folder._id}
         defaultValue={folder.directory_name}
         actionType={actionType}
         isDirectory={isDirectory}

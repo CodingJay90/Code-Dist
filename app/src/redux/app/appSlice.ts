@@ -2,6 +2,7 @@ import { createSlice, current, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "@/reduxStore/store";
 import { IDirectory, IFile } from "@/graphql/models/app.interface";
 import UseLocalStorage from "@/utils/storage";
+import { removeTrailingSlash } from "@/utils/string";
 
 interface DirectoryTree {
   directories: IDirectory[];
@@ -165,7 +166,8 @@ export const app = createSlice({
           const subDirectory = curr.sub_directory
             ? recursiveUpdate(curr.sub_directory)
             : undefined;
-          curr.files.splice(curr.files.indexOf(file));
+          curr.files = curr.files.filter((f) => f._id !== file._id);
+          // curr.files.splice(curr.files.indexOf(file));
           if (curr._id === directory._id) {
             curr.files.push(file);
           }
@@ -244,6 +246,185 @@ export const app = createSlice({
         directoryTree.directories
       );
     },
+    createDirectoryOrFileAction: (
+      state,
+      action: PayloadAction<{
+        newDirectory?: IDirectory;
+        directoryId: string;
+        newFile?: IFile;
+      }>
+    ) => {
+      const { newDirectory, directoryId, newFile } = action.payload;
+      const directoryTree = JSON.parse(
+        JSON.stringify(current(state.directoryTree))
+      ) as DirectoryTree;
+
+      const recurseDirectoryTree = (directories: IDirectory[]): IDirectory[] =>
+        directories.map((elem) => {
+          return {
+            ...elem,
+            ...(newFile && {
+              files:
+                elem._id === directoryId
+                  ? [...elem.files, newFile]
+                  : elem.files,
+            }),
+            sub_directory:
+              newDirectory && elem._id === directoryId
+                ? [...elem.sub_directory, newDirectory]
+                : recurseDirectoryTree(elem.sub_directory),
+          };
+        });
+
+      state.directoryTree.directories = recurseDirectoryTree(
+        directoryTree.directories
+      );
+    },
+    renameDirectoryOrFileAction: (
+      state,
+      action: PayloadAction<{
+        newDirectoryName?: string;
+        directoryId: string;
+        newFileName?: string;
+        fileId?: string;
+      }>
+    ) => {
+      const { newDirectoryName, directoryId, newFileName, fileId } =
+        action.payload;
+      const directoryTree = JSON.parse(
+        JSON.stringify(current(state.directoryTree))
+      ) as DirectoryTree;
+      const updateDirectoryPath = (
+        dirPath: string,
+        newDirNamePath: string
+      ): string => {
+        const splits = removeTrailingSlash(dirPath).split("/");
+        splits.pop();
+        return `${splits.join("/")}/${newDirNamePath}/`;
+      };
+
+      const updateSubDirectoryPaths = (
+        dirPath: string,
+        parentDirName: string,
+        newDirNamePath: string
+      ): string => {
+        const matchedIndexFromParentPath = dirPath
+          .split("/")
+          .findIndex((i) => i === parentDirName);
+        let dirPathSplits = dirPath.split("/");
+        dirPathSplits[matchedIndexFromParentPath] = newDirNamePath;
+        return dirPathSplits.join("/");
+      };
+
+      const updateNestedDirectoryPaths = (
+        dirs: IDirectory[],
+        directoryName: string,
+        newDirectoryPathName: string
+      ): IDirectory[] => {
+        return dirs.map((i) => ({
+          ...i,
+          files: i.files.map((file) => ({
+            ...file,
+            file_dir: updateSubDirectoryPaths(
+              file.file_dir,
+              directoryName,
+              newDirectoryPathName
+            ),
+          })),
+          directory_path: updateSubDirectoryPaths(
+            i.directory_path,
+            directoryName,
+            newDirectoryPathName
+          ),
+          sub_directory: updateNestedDirectoryPaths(
+            i.sub_directory,
+            directoryName,
+            newDirectoryPathName
+          ),
+        }));
+      };
+
+      const recurseDirectoryTree = (directories: IDirectory[]): IDirectory[] =>
+        directories.map((dir) => {
+          return {
+            ...dir,
+            ...(dir._id === directoryId &&
+              newDirectoryName && {
+                directory_name: newDirectoryName,
+                directory_path: updateDirectoryPath(
+                  dir.directory_path,
+                  newDirectoryName
+                ),
+                files: dir.files.map((file) => ({
+                  ...file,
+                  file_dir: updateSubDirectoryPaths(
+                    file.file_dir,
+                    dir.directory_name,
+                    newDirectoryName
+                  ),
+                })),
+              }),
+            ...(dir._id === directoryId &&
+              newFileName && {
+                directory_name: newDirectoryName,
+                files: dir.files.map((file) => {
+                  return file._id === fileId
+                    ? {
+                        ...file,
+                        file_name: newFileName,
+                        file_dir: updateSubDirectoryPaths(
+                          file.file_dir,
+                          file.file_name,
+                          newFileName
+                        ),
+                      }
+                    : file;
+                }),
+              }),
+            sub_directory:
+              newDirectoryName && dir._id === directoryId
+                ? updateNestedDirectoryPaths(
+                    dir.sub_directory,
+                    dir.directory_name,
+                    newDirectoryName
+                  )
+                : recurseDirectoryTree(dir.sub_directory),
+          };
+        });
+
+      // console.log(recurseDirectoryTree(directoryTree.directories));
+
+      state.directoryTree.directories = recurseDirectoryTree(
+        directoryTree.directories
+      );
+    },
+    deleteDirectoryOrFileAction: (
+      state,
+      action: PayloadAction<{
+        directoryId?: string;
+        fileId?: string;
+      }>
+    ) => {
+      const { directoryId, fileId } = action.payload;
+      const directoryTree = JSON.parse(
+        JSON.stringify(current(state.directoryTree))
+      ) as DirectoryTree;
+
+      const recurseDirectoryTree = (directories: IDirectory[]): IDirectory[] =>
+        directories
+          .map((elem) => {
+            return {
+              ...elem,
+              files: elem.files.filter((file) => file._id !== fileId),
+              sub_directory: recurseDirectoryTree(elem.sub_directory),
+            };
+          })
+          .filter((i) => i._id !== directoryId);
+
+      state.directoryTree.directories = recurseDirectoryTree(
+        directoryTree.directories
+      );
+    },
   },
 });
 
@@ -260,6 +441,9 @@ export const {
   updateFileOnEditorLeave,
   moveFile,
   moveFolder,
+  createDirectoryOrFileAction,
+  renameDirectoryOrFileAction,
+  deleteDirectoryOrFileAction,
 } = app.actions;
 
 export default app.reducer;

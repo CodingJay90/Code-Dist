@@ -40,7 +40,14 @@ const DELETE_FILE = gql`
 `;
 const CREATE_FILE = gql`
   mutation CreateFile($input: CreateFileInput!) {
-    createFile(input: $input)
+    createFile(input: $input) {
+      _id
+      file_id
+      file_type
+      file_name
+      file_dir
+      file_content
+    }
   }
 `;
 const RENAME_FILE = gql`
@@ -75,7 +82,7 @@ export const useCreateDirectory = (args: {
   directoryName: string;
   directoryPath: string;
 }) => {
-  const [createDirectory, { error, data }] = useMutation<
+  const [createDirectoryMutation, { error, data }] = useMutation<
     { createDirectory: IDirectory },
     { input: Pick<IDirectory, "directory_name" | "directory_path"> }
   >(CREATE_DIRECTORY, {
@@ -85,28 +92,28 @@ export const useCreateDirectory = (args: {
         directory_path: args.directoryPath,
       },
     },
-    update(proxy, result) {
-      const data = proxy.readQuery({
-        query: GET_DIRECTORY_TREE,
-      }) as { getDirectoryTree: IDirectoryTree };
-      let createdDirectoryData = [...data.getDirectoryTree.directories];
-      createdDirectoryData = [
-        result.data?.createDirectory as IDirectory,
-        ...createdDirectoryData,
-      ];
-      proxy.writeQuery({
-        query: GET_DIRECTORY_TREE,
-        data: {
-          ...data,
-          getDirectoryTree: {
-            createdDirectoryData,
-          },
-        },
-      });
-    },
+    // update(proxy, result) {
+    //   const data = proxy.readQuery({
+    //     query: GET_DIRECTORY_TREE,
+    //   }) as { getDirectoryTree: IDirectoryTree };
+    //   let createdDirectoryData = [...data.getDirectoryTree.directories];
+    //   createdDirectoryData = [
+    //     result.data?.createDirectory as IDirectory,
+    //     ...createdDirectoryData,
+    //   ];
+    //   proxy.writeQuery({
+    //     query: GET_DIRECTORY_TREE,
+    //     data: {
+    //       ...data,
+    //       getDirectoryTree: {
+    //         createdDirectoryData,
+    //       },
+    //     },
+    //   });
+    // },
   });
 
-  return { createDirectory, data, error };
+  return { createDirectoryMutation, data, error };
 };
 
 export const useDeleteDirectory = (id: string) => {
@@ -119,32 +126,32 @@ export const useDeleteDirectory = (id: string) => {
         _id: id,
       },
     },
-    update(proxy, result) {
-      const data = proxy.readQuery({
-        query: GET_DIRECTORY_TREE,
-      }) as { getDirectoryTree: IDirectoryTree };
-      let allDirectories = [...data.getDirectoryTree.directories];
+    // update(proxy, result) {
+    //   const data = proxy.readQuery({
+    //     query: GET_DIRECTORY_TREE,
+    //   }) as { getDirectoryTree: IDirectoryTree };
+    //   let allDirectories = [...data.getDirectoryTree.directories];
 
-      function recursiveFilter(items: IDirectory[]) {
-        const updated = items.map((i) => {
-          if (i.sub_directory && i.sub_directory.length > 0)
-            recursiveFilter(i.sub_directory);
-          if (i._id === id) i = null as any; //cannot use delete while in strict mode
-          return i;
-        });
-        return updated;
-      }
+    //   function recursiveFilter(items: IDirectory[]) {
+    //     const updated = items.map((i) => {
+    //       if (i.sub_directory && i.sub_directory.length > 0)
+    //         recursiveFilter(i.sub_directory);
+    //       if (i._id === id) i = null as any; //cannot use delete while in strict mode
+    //       return i;
+    //     });
+    //     return updated;
+    //   }
 
-      const filteredDirectories = recursiveFilter(allDirectories);
-      proxy.writeQuery({
-        query: GET_DIRECTORY_TREE,
-        data: {
-          getDirectoryTree: {
-            filteredDirectories,
-          },
-        },
-      });
-    },
+    //   const filteredDirectories = recursiveFilter(allDirectories);
+    //   proxy.writeQuery({
+    //     query: GET_DIRECTORY_TREE,
+    //     data: {
+    //       getDirectoryTree: {
+    //         filteredDirectories,
+    //       },
+    //     },
+    //   });
+    // },
   });
 
   return { deleteDirectory, data, error };
@@ -154,7 +161,7 @@ export const useRenameDirectory = (args: {
   directoryName: string;
   id: string;
 }) => {
-  const [renameDirectory, { error, data }] = useMutation<
+  const [renameDirectoryMutation, { error, data }] = useMutation<
     { renameDirectory: string },
     { input: Pick<IDirectory, "_id" | "directory_name"> }
   >(RENAME_DIRECTORY, {
@@ -164,43 +171,43 @@ export const useRenameDirectory = (args: {
         directory_name: args.directoryName,
       },
     },
-    update(proxy, result) {
-      const data = proxy.readQuery({
-        query: GET_DIRECTORY_TREE,
-      }) as { getDirectoryTree: IDirectoryTree };
-      let allDirectories = [...data.getDirectoryTree.directories];
+    // update(proxy, result) {
+    //   const data = proxy.readQuery({
+    //     query: GET_DIRECTORY_TREE,
+    //   }) as { getDirectoryTree: IDirectoryTree };
+    //   let allDirectories = [...data.getDirectoryTree.directories];
 
-      function recursiveFilter(items: IDirectory[]) {
-        const updated = items.map((i) => {
-          if (i.sub_directory && i.sub_directory.length > 0)
-            recursiveFilter(i.sub_directory);
-          if (i._id === args.id) {
-            // i.directory_name = args.directoryName;
-            // i.directory_path = result.data?.renameDirectory ?? i.directory_path;
-          }
-          return i;
-        });
-        return updated;
-      }
+    //   function recursiveFilter(items: IDirectory[]) {
+    //     const updated = items.map((i) => {
+    //       if (i.sub_directory && i.sub_directory.length > 0)
+    //         recursiveFilter(i.sub_directory);
+    //       if (i._id === args.id) {
+    //         // i.directory_name = args.directoryName;
+    //         // i.directory_path = result.data?.renameDirectory ?? i.directory_path;
+    //       }
+    //       return i;
+    //     });
+    //     return updated;
+    //   }
 
-      const filteredDirectories = recursiveFilter(allDirectories);
-      proxy.writeQuery({
-        query: GET_DIRECTORY_TREE,
-        data: {
-          getDirectoryTree: {
-            filteredDirectories,
-          },
-        },
-      });
-    },
+    //   const filteredDirectories = recursiveFilter(allDirectories);
+    //   proxy.writeQuery({
+    //     query: GET_DIRECTORY_TREE,
+    //     data: {
+    //       getDirectoryTree: {
+    //         filteredDirectories,
+    //       },
+    //     },
+    //   });
+    // },
   });
 
-  return { renameDirectory, data, error };
+  return { renameDirectoryMutation, data, error };
 };
 
 export const useCreateFile = (args: { fileName: string; dir: string }) => {
-  const [createFile, { error, data }] = useMutation<
-    { createFile: string },
+  const [createFileMutation, { error, data }] = useMutation<
+    { createFile: IFile },
     { input: Pick<IFile, "file_name" | "file_dir"> }
   >(CREATE_FILE, {
     variables: {
@@ -209,27 +216,27 @@ export const useCreateFile = (args: { fileName: string; dir: string }) => {
         file_dir: args.dir,
       },
     },
-    update(proxy) {
-      const data = proxy.readQuery({
-        query: GET_DIRECTORY_TREE,
-      }) as { getDirectoryTree: IDirectoryTree };
-      let allDirectories = [...data.getDirectoryTree.directories];
-      proxy.writeQuery({
-        query: GET_DIRECTORY_TREE,
-        data: {
-          getDirectoryTree: {
-            allDirectories,
-          },
-        },
-      });
-    },
+    // update(proxy) {
+    //   const data = proxy.readQuery({
+    //     query: GET_DIRECTORY_TREE,
+    //   }) as { getDirectoryTree: IDirectoryTree };
+    //   let allDirectories = [...data.getDirectoryTree.directories];
+    //   proxy.writeQuery({
+    //     query: GET_DIRECTORY_TREE,
+    //     data: {
+    //       getDirectoryTree: {
+    //         allDirectories,
+    //       },
+    //     },
+    //   });
+    // },
   });
 
-  return { createFile, data, error };
+  return { createFileMutation, data, error };
 };
 
 export const useRenameFile = (args: { fileName: string; id: string }) => {
-  const [renameFile, { error, data }] = useMutation<
+  const [renameFileMutation, { error, data }] = useMutation<
     { RenameFile: string },
     { input: Pick<IFile, "file_id" | "file_name"> }
   >(RENAME_FILE, {
@@ -239,23 +246,23 @@ export const useRenameFile = (args: { fileName: string; id: string }) => {
         file_name: args.fileName,
       },
     },
-    update(proxy) {
-      const data = proxy.readQuery({
-        query: GET_DIRECTORY_TREE,
-      }) as { getDirectoryTree: IDirectoryTree };
-      let allDirectories = [...data.getDirectoryTree.directories];
-      proxy.writeQuery({
-        query: GET_DIRECTORY_TREE,
-        data: {
-          getDirectoryTree: {
-            allDirectories,
-          },
-        },
-      });
-    },
+    // update(proxy) {
+    //   const data = proxy.readQuery({
+    //     query: GET_DIRECTORY_TREE,
+    //   }) as { getDirectoryTree: IDirectoryTree };
+    //   let allDirectories = [...data.getDirectoryTree.directories];
+    //   proxy.writeQuery({
+    //     query: GET_DIRECTORY_TREE,
+    //     data: {
+    //       getDirectoryTree: {
+    //         allDirectories,
+    //       },
+    //     },
+    //   });
+    // },
   });
 
-  return { renameFile, data, error };
+  return { renameFileMutation, data, error };
 };
 
 export const useMoveFile = (args: {
@@ -296,20 +303,20 @@ export const useDeleteFile = (id: string) => {
         file_id: id,
       },
     },
-    update(proxy) {
-      const data = proxy.readQuery({
-        query: GET_DIRECTORY_TREE,
-      }) as { getDirectoryTree: IDirectoryTree };
-      let allDirectories = [...data.getDirectoryTree.directories];
-      proxy.writeQuery({
-        query: GET_DIRECTORY_TREE,
-        data: {
-          getDirectoryTree: {
-            allDirectories,
-          },
-        },
-      });
-    },
+    // update(proxy) {
+    //   const data = proxy.readQuery({
+    //     query: GET_DIRECTORY_TREE,
+    //   }) as { getDirectoryTree: IDirectoryTree };
+    //   let allDirectories = [...data.getDirectoryTree.directories];
+    //   proxy.writeQuery({
+    //     query: GET_DIRECTORY_TREE,
+    //     data: {
+    //       getDirectoryTree: {
+    //         allDirectories,
+    //       },
+    //     },
+    //   });
+    // },
   });
 
   return { deleteFile, data, error };
