@@ -11,8 +11,14 @@ import React, { useState } from "react";
 import { Input, InputWrapper, Wrapper } from "./elements";
 import { ActionType } from "@/components/App/types";
 import FileIcon from "@/components/Icons/FileIcon";
-import { IFile } from "@/graphql/models/app.interface";
+import { IDirectory, IFile } from "@/graphql/models/app.interface";
 import { useInteractionContext } from "@/contexts/interactions/InteractionContextProvider";
+import { useAppDispatch } from "@/reduxStore/hooks";
+import {
+  createDirectoryOrFileAction,
+  renameDirectoryOrFileAction,
+} from "@/reduxStore/app/appSlice";
+import { useEffect } from "react";
 
 interface IProps {
   showTextField: boolean;
@@ -38,24 +44,48 @@ const TextField = ({
   const [textField, setNewDirectoryName] = useState<string>(defaultValue);
   const { explorerInteractions, setExplorerInteractionsState } =
     useInteractionContext();
-  const { createDirectory } = useCreateDirectory({
+  const dispatch = useAppDispatch();
+  const { createDirectoryMutation, data } = useCreateDirectory({
     directoryName: textField,
     directoryPath,
   });
-  const { renameDirectory } = useRenameDirectory({
+  const { renameDirectoryMutation } = useRenameDirectory({
     id: directoryId,
     directoryName: textField,
   });
 
-  const { renameFile } = useRenameFile({
+  const { renameFileMutation } = useRenameFile({
     fileName: textField,
     id: fileId ?? "",
   });
 
-  const { createFile } = useCreateFile({
+  const createFileMutationData = useCreateFile({
     dir: directoryPath,
     fileName: textField,
   });
+  const { createFileMutation } = createFileMutationData;
+  const createFileMutationResult = createFileMutationData.data?.createFile;
+
+  useEffect(() => {
+    if (data?.createDirectory) {
+      dispatch(
+        createDirectoryOrFileAction({
+          newDirectory: data?.createDirectory,
+          directoryId,
+        })
+      );
+    }
+  }, [data?.createDirectory]);
+  useEffect(() => {
+    if (createFileMutationResult) {
+      dispatch(
+        createDirectoryOrFileAction({
+          newFile: createFileMutationResult,
+          directoryId,
+        })
+      );
+    }
+  }, [createFileMutationResult]);
 
   function closeTextField(): void {
     setShowTextField(false);
@@ -64,6 +94,26 @@ const TextField = ({
       explorerNavCreateFile: false,
       explorerNavCreateDirectory: false,
     });
+  }
+
+  function createDirectory(): void {
+    createDirectoryMutation();
+  }
+  function renameDirectory(): void {
+    renameDirectoryMutation();
+    dispatch(
+      renameDirectoryOrFileAction({ newDirectoryName: textField, directoryId })
+    );
+  }
+  function renameFile(): void {
+    renameFileMutation();
+    dispatch(
+      renameDirectoryOrFileAction({
+        newFileName: textField,
+        directoryId,
+        fileId,
+      })
+    );
   }
 
   function onTextFieldChange(e: React.KeyboardEvent<HTMLInputElement>): void {
@@ -75,7 +125,7 @@ const TextField = ({
       if (isDirectory) {
         actionType === "rename" ? renameDirectory() : createDirectory();
       } else {
-        actionType === "rename" ? renameFile() : createFile();
+        actionType === "rename" ? renameFile() : createFileMutation();
       }
       setShowTextField(false);
     }
@@ -86,8 +136,14 @@ const TextField = ({
   return (
     <Wrapper>
       <StyledFlex justify="flex-start">
-        {isDirectory && <Arrow direction="right" />}
-        {isDirectory ? <FolderIcon /> : <FileIcon />}
+        {isDirectory ? (
+          <>
+            <Arrow direction="right" />
+            <FolderIcon />
+          </>
+        ) : (
+          <FileIcon />
+        )}
         <InputWrapper>
           <Input
             ref={(input: HTMLInputElement) => input?.focus()}

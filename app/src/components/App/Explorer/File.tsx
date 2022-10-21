@@ -11,16 +11,18 @@ import { useInteractionContext } from "@/contexts/interactions/InteractionContex
 import { useAppDispatch } from "@/reduxStore/hooks";
 import {
   addToOpenedFiles,
+  deleteDirectoryOrFileAction,
   setActiveOpenedFile,
 } from "@/reduxStore/app/appSlice";
 import UseLocalStorage from "@/utils/storage";
 interface IProps {
   file: IFile;
   directoryPath: string;
+  directoryId: string;
 }
 
 const getLocalStorage = UseLocalStorage.getInstance();
-const File = ({ file, directoryPath }: IProps) => {
+const File = ({ file, directoryPath, directoryId }: IProps) => {
   const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
   const [showTextField, setShowTextField] = useState<boolean>(false);
   const [actionType, setActionType] = useState<ActionType>("create");
@@ -76,7 +78,10 @@ const File = ({ file, directoryPath }: IProps) => {
       {
         shortcut: "",
         label: "delete",
-        onClick: () => deleteFile(),
+        onClick: () => {
+          deleteFile();
+          dispatch(deleteDirectoryOrFileAction({ fileId: file._id }));
+        },
       },
       {
         shortcut: "",
@@ -133,11 +138,11 @@ const File = ({ file, directoryPath }: IProps) => {
         showTextField={showTextField}
         setShowTextField={setShowTextField}
         directoryPath={directoryPath}
-        directoryId=""
+        directoryId={directoryId}
         defaultValue={file.file_name}
         actionType={actionType}
         isDirectory={false}
-        fileId={file.file_id}
+        fileId={file._id}
       />
     </FileContainer>
   );

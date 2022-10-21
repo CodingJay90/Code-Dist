@@ -64,6 +64,7 @@ const Explorer = () => {
             {i.files.map((file) => (
               <File
                 directoryPath={i.directory_path}
+                directoryId={i._id}
                 file={file}
                 key={file._id}
               />
@@ -84,6 +85,7 @@ const Explorer = () => {
             {i.files.map((file) => (
               <File
                 directoryPath={i.directory_path}
+                directoryId={i._id}
                 file={file}
                 key={file._id}
               />

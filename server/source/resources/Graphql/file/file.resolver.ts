@@ -29,8 +29,8 @@ export class FileResolver {
     return file;
   }
 
-  @Mutation(() => String)
-  async createFile(@Arg('input') input: CreateFileInput): Promise<string> {
+  @Mutation(() => File)
+  async createFile(@Arg('input') input: CreateFileInput): Promise<IFile> {
     const { file_name, file_dir } = input;
     // const directoryToAddFile = await this.DirectoryService.getDirectory({
     //   directory_path: file_dir,
@@ -46,7 +46,7 @@ export class FileResolver {
       file_name,
       file_type: fileExtension ?? '',
     });
-    return createdFile._id ?? '';
+    return createdFile;
   }
 
   @Mutation(() => String)

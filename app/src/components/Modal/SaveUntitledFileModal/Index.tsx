@@ -27,6 +27,9 @@ import {
 import FolderIcon from "@/components/Icons/FolderIcon";
 import { IDirectory } from "@/graphql/models/app.interface";
 import { useCreateFile } from "@/graphql/mutations/app.mutations";
+import { useEffect } from "react";
+import { useAppDispatch } from "@/reduxStore/hooks";
+import { createDirectoryOrFileAction } from "@/reduxStore/app/appSlice";
 
 interface IProps {
   directories: IDirectory[];
@@ -47,12 +50,26 @@ const SaveUntitledFileModal = ({
 }: IProps) => {
   const [directoryPathToAddUntitledFile, setDirectoryPathToAddUntitledFile] =
     useState<string>("");
+  const [directoryIdToAddUntitledFile, setDirectoryIdToAddUntitledFile] =
+    useState<string>("");
   const [fileName, setFileName] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const { createFile } = useCreateFile({
+  const { createFileMutation, data } = useCreateFile({
     dir: directoryPathToAddUntitledFile,
     fileName,
   });
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (directoryIdToAddUntitledFile && data?.createFile) {
+      dispatch(
+        createDirectoryOrFileAction({
+          newFile: data?.createFile,
+          directoryId: directoryIdToAddUntitledFile,
+        })
+      );
+    }
+  }, [data?.createFile, directoryIdToAddUntitledFile]);
 
   function closeModal(): void {
     setShowModal(false);
@@ -89,9 +106,10 @@ const SaveUntitledFileModal = ({
                         type="radio"
                         name="directory-select"
                         value={dir.directory_path}
-                        onChange={() =>
-                          setDirectoryPathToAddUntitledFile(dir.directory_path)
-                        }
+                        onChange={() => {
+                          setDirectoryPathToAddUntitledFile(dir.directory_path);
+                          setDirectoryIdToAddUntitledFile(dir._id);
+                        }}
                       />
                     </StyledFlex>
                   </DirectoryListItem>
@@ -104,7 +122,7 @@ const SaveUntitledFileModal = ({
             <StyledFlex>
               <Input
                 type="text"
-                defaultValue={defaultFileName}
+                defaultValue={defaultFileName ?? "Enter file name"}
                 value={fileName}
                 onChange={(e) => setFileName(e.target.value)}
               />
@@ -116,7 +134,7 @@ const SaveUntitledFileModal = ({
 
                     //     return
                     // }
-                    createFile();
+                    createFileMutation();
                     closeModal();
                   }}
                 >
