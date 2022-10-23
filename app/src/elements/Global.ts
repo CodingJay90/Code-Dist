@@ -20,12 +20,14 @@ export const StyledFlex = styled.div<{
   justify?: JustifyContent;
   align?: AlignContent;
   width?: string;
+  height?: string;
 }>`
   display: flex;
   flex-direction: ${(props) => props.direction ?? "row"};
   justify-content: ${(props) => props.justify ?? "space-between"};
   align-items: ${(props) => props.align ?? "center"};
   width: ${(props) => props.width ?? "100%"};
+  height: ${(props) => props.height ?? "initial"};
 `;
 
 export const StyledContainer = styled.div<{ width: string }>`

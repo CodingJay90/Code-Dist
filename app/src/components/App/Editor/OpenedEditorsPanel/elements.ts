@@ -5,10 +5,11 @@ import styled from "styled-components";
 export const PanelContainer = styled.div`
   width: 100%;
   height: auto;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.blackMd};
 `;
 export const PanelContainerWrapper = styled(StyledFlex)`
-  outline: 1px solid #706f6f;
   flex-wrap: wrap;
+  /* background: ${({ theme }) => theme.colors.mainLight}; */
 `;
 export const PanelStatus = styled.span<{ visibility?: string }>`
   visibility: ${(props) => props.visibility};
@@ -24,10 +25,10 @@ export const PanelStatus = styled.span<{ visibility?: string }>`
     content: "x";
     text-align: center;
     position: absolute;
-    background-color: #8892b0;
-    color: #e6f1ff;
+    /* background-color: transparent; */
+    color: ${({ theme }) => theme.colors.blackMd};
     cursor: pointer;
-    top: 0;
+    top: -1px;
     bottom: 0;
     right: 0;
     left: 0;
@@ -37,20 +38,28 @@ export const PanelStatus = styled.span<{ visibility?: string }>`
     font-size: 13px;
     border-radius: 4px;
     visibility: hidden;
+
+    background-color: ${({ theme }) => theme.colors.mainDark};
+    :hover {
+      background-color: ${({ theme }) => theme.colors.mainDark};
+    }
   }
 `;
 
 export const Panel = styled.div<{ active: boolean }>`
   user-select: none;
-  min-width: 150px;
+  min-width: 120px;
   height: 2rem;
   max-height: 3rem;
-  flex-grow: 1;
-  outline: 1px solid #706f6f;
-  margin-bottom: 1px;
-  margin-right: 1px;
+  /* border: 1px solid #000; */
+  width: fit-content;
+  /* flex-grow: 1; */
+  /* outline: 1px solid #706f6f; */
+  margin: 1px;
   cursor: pointer;
-  background: ${(props) => (props.active ? "lightgrey" : "transparent")};
+  /* background: ${(props) => (props.active ? "lightgrey" : "transparent")}; */
+  background: ${({ active, theme }) =>
+    active ? theme.colors.mainDark : theme.colors.mainLight};
 
   :hover ${PanelStatus} {
     ::before {
@@ -61,6 +70,7 @@ export const Panel = styled.div<{ active: boolean }>`
 export const PanelGroup = styled(StyledFlex)`
   height: 100%;
   padding: 0 0.5rem;
+  gap: 5px;
 `;
 export const PanelName = styled.span`
   font-size: 0.8rem;

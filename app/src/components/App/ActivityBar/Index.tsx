@@ -7,21 +7,23 @@ interface IProps {
   setExplorerView: React.Dispatch<React.SetStateAction<ExplorerView>>;
   explorerView: ExplorerView;
 }
-const ActivityBar = ({ setExplorerView }: IProps) => {
+const ActivityBar = ({ setExplorerView, explorerView }: IProps) => {
   return (
     <Container>
       <StyledFlex direction="column">
         <IconWrapper
+          active={explorerView === ExplorerView.EXPLORER}
           width="50%"
           onClick={() => setExplorerView(ExplorerView.EXPLORER)}
         >
-          <VscFiles size={24} />
+          <VscFiles fill="#fff" size={24} />
         </IconWrapper>
         <IconWrapper
+          active={explorerView === ExplorerView.SEARCH}
           width="50%"
           onClick={() => setExplorerView(ExplorerView.SEARCH)}
         >
-          <VscSearch size={24} />
+          <VscSearch fill="#fff" size={24} />
         </IconWrapper>
       </StyledFlex>
     </Container>

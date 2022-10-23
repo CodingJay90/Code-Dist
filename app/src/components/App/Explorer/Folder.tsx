@@ -7,8 +7,10 @@ import {
   FolderBlock,
   FolderDragWrapper,
   FolderDropWrapper,
+  FolderHover,
   FolderIcon,
   FolderName,
+  FolderNest,
   FolderWrapper,
   NestedFolder,
 } from "./elements";
@@ -224,44 +226,49 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
   }
 
   return (
-    <FolderBlock
-      key={folder.directory_id}
-      nested={nested}
-      isHovered={isOver || directoryHover}
-    >
-      <FolderDragWrapper ref={directoryDrag} isDragged={isDragged}>
-        <FolderDropWrapper ref={directoryDrop}>
-          <FolderWrapper
-            justify="flex-start"
-            fileHovered={isOver}
-            ref={drop}
-            onMouseDown={onFolderClick}
-          >
-            <FolderArrowIcon direction={showSubFolders ? "down" : "right"} />
-            <FolderIcon />
-            <FolderName>{folder.directory_name}</FolderName>
-          </FolderWrapper>
-        </FolderDropWrapper>
-      </FolderDragWrapper>
+    <>
+      {/* <FolderHover></FolderHover> */}
+      <FolderBlock
+        key={folder.directory_id}
+        nested={nested}
+        isHovered={isOver || directoryHover}
+        id="folderBlock"
+      >
+        <FolderDragWrapper ref={directoryDrag} isDragged={isDragged} id="hover">
+          <FolderDropWrapper ref={directoryDrop} nested={nested}>
+            <FolderWrapper
+              justify="flex-start"
+              fileHovered={isOver}
+              ref={drop}
+              onMouseDown={onFolderClick}
+              nested={nested}
+            >
+              <FolderArrowIcon direction={showSubFolders ? "down" : "right"} />
+              <FolderIcon />
+              <FolderName>{folder.directory_name}</FolderName>
+            </FolderWrapper>
+          </FolderDropWrapper>
+        </FolderDragWrapper>
 
-      <ContextMenu
-        contextPosition={cursorPosition}
-        showContext={showContextMenu}
-        onClickOutside={() => setShowContextMenu(false)}
-        setShowContext={setShowContextMenu}
-        menuItems={menuItems}
-      />
-      <TextField
-        showTextField={showTextField}
-        setShowTextField={setShowTextField}
-        directoryPath={folder.directory_path}
-        directoryId={folder._id}
-        defaultValue={folder.directory_name}
-        actionType={actionType}
-        isDirectory={isDirectory}
-      />
-      {showSubFolders && <NestedFolder>{children}</NestedFolder>}
-    </FolderBlock>
+        <ContextMenu
+          contextPosition={cursorPosition}
+          showContext={showContextMenu}
+          onClickOutside={() => setShowContextMenu(false)}
+          setShowContext={setShowContextMenu}
+          menuItems={menuItems}
+        />
+        <TextField
+          showTextField={showTextField}
+          setShowTextField={setShowTextField}
+          directoryPath={folder.directory_path}
+          directoryId={folder._id}
+          defaultValue={folder.directory_name}
+          actionType={actionType}
+          isDirectory={isDirectory}
+        />
+        {showSubFolders && <NestedFolder>{children}</NestedFolder>}
+      </FolderBlock>
+    </>
   );
 };
 
