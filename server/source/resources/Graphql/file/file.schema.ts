@@ -40,6 +40,14 @@ export class CreateFileInput {
   file_dir!: string;
 }
 @InputType()
+export class UpdateFileContentInput {
+  @Field()
+  file_content!: string;
+
+  @Field()
+  _id!: string;
+}
+@InputType()
 export class RenameFileInput {
   @Field()
   file_name!: string;

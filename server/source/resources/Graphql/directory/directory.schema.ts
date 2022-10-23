@@ -47,6 +47,15 @@ export class Directory implements IDirectory {
   files!: File[];
 }
 
+@ObjectType()
+export class DirectoryTree {
+  @Field((type) => [Directory])
+  directories!: [Directory];
+
+  @Field((type) => [File])
+  root_dir_files!: [File];
+}
+
 @InputType()
 export class DirectoryInput
   implements Pick<Directory, 'directory_name' | 'directory_path'>

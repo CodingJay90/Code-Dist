@@ -10,8 +10,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky install",
-    "dev:server": "npm run dev-watch --prefix server",
-    "lint-server": "npm run lint --prefix server",
+    "start:server": "npm run dev-watch --prefix server",
+    "start:app": "npm start --prefix app",
+    "lint-server": "cd server && npx lint-staged",
     "create-hook": "husky add .husky/pre-commit \"npm lint-server\""
   },
   "repository": {

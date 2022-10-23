@@ -9,6 +9,7 @@ import {
   GetFileInput,
   MoveFileInput,
   RenameFileInput,
+  UpdateFileContentInput,
 } from '@/graphql/file/file.schema';
 import { IFile } from '@/graphql/file/file.interface';
 
@@ -28,16 +29,16 @@ export class FileResolver {
     return file;
   }
 
-  @Mutation(() => String)
-  async createFile(@Arg('input') input: CreateFileInput): Promise<string> {
+  @Mutation(() => File)
+  async createFile(@Arg('input') input: CreateFileInput): Promise<IFile> {
     const { file_name, file_dir } = input;
-    const directoryToAddFile = await this.DirectoryService.getDirectory({
-      directory_path: file_dir,
-    });
+    // const directoryToAddFile = await this.DirectoryService.getDirectory({
+    //   directory_path: file_dir,
+    // });
     const formattedDir = removeTrailingSlash(file_dir);
-    if (directoryToAddFile == null) {
-      return await Promise.reject(new Error("Directory doesn't exist"));
-    }
+    // if (directoryToAddFile == null) {
+    //   return await Promise.reject(new Error("Directory doesn't exist"));
+    // }
     const fileExtension =
       file_name.split('.').length > 1 ? file_name.split('.').pop() : '';
     const createdFile = await this.FileService.createFile({
@@ -45,7 +46,7 @@ export class FileResolver {
       file_name,
       file_type: fileExtension ?? '',
     });
-    return createdFile._id ?? '';
+    return createdFile;
   }
 
   @Mutation(() => String)
@@ -66,6 +67,22 @@ export class FileResolver {
       file_type: fileExtension,
       file_dir: `${newFileDir.join('/')}/${file_name}`,
     });
+    return file._id ?? '';
+  }
+
+  @Mutation(() => String)
+  async updateFileContent(
+    @Arg('input') input: UpdateFileContentInput
+  ): Promise<string> {
+    const { _id, file_content } = input;
+    const file = await this.FileService.getFile({ _id });
+    if (file == null) return await Promise.reject(new Error('File not found'));
+    await this.FileService.findAndUpdate(
+      { _id },
+      {
+        file_content,
+      }
+    );
     return file._id ?? '';
   }
 
