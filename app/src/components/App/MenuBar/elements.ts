@@ -3,9 +3,11 @@ import styled from "styled-components";
 
 export const MenuBarContainer = styled.div`
   height: 4vh;
-  border-bottom: 1px solid grey;
+  height: 44px;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.blackMd};
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
+  background-color: ${({ theme }) => theme.colors.mainMd};
 `;
 export const MenuBarGroup = styled(StyledFlex)`
   height: 100%;

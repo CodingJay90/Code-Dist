@@ -1,5 +1,11 @@
 import { StyledContainer } from "@/elements/Global";
-import { ContextList, ContextListItem, Wrapper } from "./elements";
+import {
+  ContextList,
+  ContextListItem,
+  ContextListItemWrapper,
+  HR,
+  Wrapper,
+} from "./elements";
 import useOnClickOutside from "@/hooks/useOnclickOutside";
 
 type MenuItem = {
@@ -33,19 +39,22 @@ const ContextMenu = ({
     <Wrapper ref={contextRef} x={contextPosition.x} y={contextPosition.y}>
       <StyledContainer width="100%">
         {menuItems.map((i, index) => (
-          <ContextList key={index}>
-            {i.map((item, ind) => (
-              <ContextListItem
-                key={ind}
-                onClick={() => {
-                  setShowContext(false);
-                  item.onClick();
-                }}
-              >
-                {item.label}
-              </ContextListItem>
-            ))}
-          </ContextList>
+          <>
+            <ContextList key={index}>
+              {i.map((item, ind) => (
+                <ContextListItem
+                  key={ind}
+                  onClick={() => {
+                    setShowContext(false);
+                    item.onClick();
+                  }}
+                >
+                  {item.label}
+                </ContextListItem>
+              ))}
+            </ContextList>
+            {menuItems.length - index !== index && <HR />}
+          </>
         ))}
       </StyledContainer>
     </Wrapper>

@@ -21,6 +21,8 @@ import { useInteractionContext } from "@/contexts/interactions/InteractionContex
 
 const OpenedEditorsPanel = () => {
   const [showDialogModal, setShowDialogModal] = useState<boolean>(false);
+  const [panelStatusVisibility, setPanelStatusVisibility] =
+    useState<boolean>(true);
   const [fileToClose, setFileToClose] = useState<IFile | null>(null);
   const { editorInteractions, setEditorInteractionsState } =
     useInteractionContext();
@@ -54,7 +56,16 @@ const OpenedEditorsPanel = () => {
             <PanelGroup>
               <FcFile />
               <PanelName>{file.file_name}</PanelName>
-              <PanelStatus onClick={(e) => onFileClose(e, file)}>
+              <PanelStatus
+                // visibility={panelStatusVisibility ? "visible" : "hidden"}
+                onClick={(e) => onFileClose(e, file)}
+                // onMouseOver={() =>
+                //   setPanelStatusVisibility(file.isModified ?? false)
+                // }
+                // onMouseOut={() =>
+                //   setPanelStatusVisibility(!!file.isModified ?? true)
+                // }
+              >
                 {file.isModified && <VscCircleFilled />}
               </PanelStatus>
             </PanelGroup>
