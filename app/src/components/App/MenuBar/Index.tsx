@@ -82,10 +82,11 @@ const MenuBar = () => {
     },
   }: any) => {
     validity.valid && uploadDirectory({ variables: { file } });
-    setExplorerInteractionsState({
-      ...explorerInteractions,
-      reRenderFileTree: true,
-    });
+    // setExplorerInteractionsState({
+    //   ...explorerInteractions,
+    //   reRenderFileTree: true,
+    // });
+    window.location.reload();
   };
 
   return (
