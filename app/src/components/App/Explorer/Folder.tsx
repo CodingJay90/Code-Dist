@@ -234,9 +234,18 @@ const Folder = ({ folder, children, nested }: IProps): JSX.Element => {
         isHovered={isOver || directoryHover}
         id="folderBlock"
       >
-        <FolderDragWrapper ref={directoryDrag} isDragged={isDragged} id="hover">
-          <FolderDropWrapper ref={directoryDrop} nested={nested}>
+        <FolderDragWrapper
+          ref={directoryDrag}
+          isDragged={isDragged}
+          id="folderDragWrapper"
+        >
+          <FolderDropWrapper
+            ref={directoryDrop}
+            nested={nested}
+            id="folderDropWrapper"
+          >
             <FolderWrapper
+              id="folderWrapper"
               justify="flex-start"
               fileHovered={isOver}
               ref={drop}

@@ -91,7 +91,7 @@ export const useGetDirectoryTree = () => {
     if (data?.getDirectoryTree) {
       const { directories, root_dir_files } = data.getDirectoryTree;
       const workspaceName: string =
-        directories[0].directory_path.split("/")[0] ?? "";
+        directories[0]?.directory_path.split("/")[0] ?? "";
       dispatch(
         setDirectoryTree({
           directories,

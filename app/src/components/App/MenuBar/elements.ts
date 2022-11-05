@@ -22,6 +22,7 @@ export const MenuBarButton = styled.button`
   border: none;
   background: transparent;
   cursor: pointer;
+  padding: 4px;
 `;
 export const UploadInput = styled.input`
   visibility: hidden;

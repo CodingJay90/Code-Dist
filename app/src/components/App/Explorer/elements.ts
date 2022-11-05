@@ -55,7 +55,7 @@ export const FolderName = styled.div`
   font-size: ${(props) => props.theme.spacing(12)};
 `;
 export const NestedFolder = styled.div`
-  position: relative;
+  /* position: relative; */
   padding-left: 8px;
   border-left: 1px solid #eee;
 `;

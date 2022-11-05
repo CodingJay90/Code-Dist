@@ -13,7 +13,8 @@
     "start:server": "npm run dev-watch --prefix server",
     "start:app": "npm start --prefix app",
     "lint-server": "cd server && npx lint-staged",
-    "create-hook": "husky add .husky/pre-commit \"npm lint-server\""
+    "create-hook": "husky add .husky/pre-commit \"npm lint-server\"",
+    "install-package": "npm i --prefix app && npm i --prefix server"
   },
   "repository": {
     "type": "git",
